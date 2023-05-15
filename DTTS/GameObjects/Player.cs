@@ -15,10 +15,10 @@ namespace DTTS.GameObjects
     {
         Vector2 velocity;
         float speed, gravity, jumpPower;
-        bool isJumping, isDead, wasFacingRight /*facing right in the last frame*/;
+        bool isJumping, isDead;
         public bool isFacingRight;
         float angle;
-        int score;
+        public int score;
         Vector2 origin;
         Color playerColor;
 
@@ -62,9 +62,7 @@ namespace DTTS.GameObjects
                 // Checks if the Player is jumping
                 if (Keyboard.GetState().IsKeyDown(Keys.Space) && !isJumping)
                 {
-                    velocity.Y = 0;
-                    velocity.Y -= jumpPower;
-                    isJumping = true;
+                    Jump();
                 }
                 // Remove jumping state so the Player stops flying while holding jump
                 if (Keyboard.GetState().IsKeyUp(Keys.Space)) isJumping = false;
@@ -83,6 +81,8 @@ namespace DTTS.GameObjects
                     if (gameOject.objectType == "wall")
                     {
                         velocity.Y = 0;
+                        isDead = true;
+                        Jump();
                     }
                     if (gameOject.objectType == "spike")
                         velocity.Y = 0;
@@ -94,17 +94,22 @@ namespace DTTS.GameObjects
                     if (gameOject.objectType == "wall")
                     {
                         velocity.X = 0;
-                        isFacingRight = !isFacingRight;
+                        speed += 0.1f;
                         speed *= -1;
-                        score++;
+                        if (!isDead)
+                        {
+                            isFacingRight = !isFacingRight;
+                            score++;
+                        }
                     }
                     if (gameOject.objectType == "spike")
                     {
                         velocity.X = 0;
-                        isFacingRight = !isFacingRight;
                         speed *= -1;
-                        score++;
-                        //isDead = true;
+                        if (!isDead)
+                        {
+                            isDead = true;
+                        }
                     }
                 }
             }
@@ -137,8 +142,13 @@ namespace DTTS.GameObjects
 
         public void Gravity(double deltaTime) => velocity.Y += (float)(gravity * deltaTime);
 
+        public bool HasTurned(bool wasFacingRight) => wasFacingRight != isFacingRight;
 
-        // TODO
-        public bool HasTurned() => wasFacingRight != isFacingRight;
+        private void Jump()
+        {
+            velocity.Y = 0;
+            velocity.Y -= jumpPower;
+            isJumping = true;
+        }
     }
 }

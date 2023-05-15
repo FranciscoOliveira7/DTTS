@@ -21,7 +21,7 @@ namespace DTTS.GameObjects
     {
         Vector2 origin;
         Facing facing;
-        bool isActive;
+        public bool isActive;
 
         float activePosition { get; }
 
@@ -35,7 +35,6 @@ namespace DTTS.GameObjects
             width = 80;
             origin = new Vector2(texture.Width / 2, texture.Height / 2);
             objectType = "spike";
-            isActive = false;
             activePosition = position.X;
         }
 
@@ -44,23 +43,25 @@ namespace DTTS.GameObjects
             //spriteBatch.Draw(texture, HitBox, Color.Gray);
 
             //spriteBatch.Draw(texture, HitBox, null, Color.White, 0, new Vector2(0, 0), (SpriteEffects)facing, 0f);
-            spriteBatch.Draw(texture, new((int)position.X + 35, (int)position.Y + 35, height, width), null, Color.White, 0, origin, (SpriteEffects)facing, 0f);
+            spriteBatch.Draw(texture, new((int)position.X + 35, (int)position.Y + 35, height, width), null, Color.Gray, 0, origin, (SpriteEffects)facing, 0f);
         }
 
         public void Update(double deltaTime)
         {
-            if (isActive) Activate(deltaTime);
-            else Deactivate(deltaTime);
+            //if (isActive) Activate();
+            //else Deactivate();
         }
 
-        public void Activate(double deltaTime)
+        public void Activate()
         {
             position.X = activePosition;
+            isActive = true;
         }
 
-        public void Deactivate(double deltaTime)
+        public void Deactivate()
         {
             position.X = activePosition - 50 * (facing == Facing.right ? 1 : -1);
+            isActive = false;
         }
     }
 }
