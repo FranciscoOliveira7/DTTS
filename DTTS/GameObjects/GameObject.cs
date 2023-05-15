@@ -35,7 +35,7 @@ namespace DTTS.GameObjects
 
         public virtual void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, HitBox, Color.White);
+            spriteBatch.Draw(texture, HitBox, GameColors.foreGround);
 
             // Draw with rotarion
             //spriteBatch.Draw(texture, Rectangle, null, Color.White, angle, new Vector2(texture.Width / 2, texture.Height / 2), SpriteEffects.None, 0f);

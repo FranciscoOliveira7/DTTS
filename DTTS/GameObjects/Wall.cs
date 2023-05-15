@@ -24,7 +24,7 @@ namespace DTTS.GameObjects
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, HitBox, Color.Gray);
+            spriteBatch.Draw(texture, HitBox, GameColors.foreGround);
             //spriteBatch.Draw(texture, HitBox, null, Color.White * Alpha, 0, Vector2.Zero, Scale, Orientation, 0);
         }
     }

@@ -40,16 +40,7 @@ namespace DTTS.GameObjects
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            //spriteBatch.Draw(texture, HitBox, Color.Gray);
-
-            //spriteBatch.Draw(texture, HitBox, null, Color.White, 0, new Vector2(0, 0), (SpriteEffects)facing, 0f);
-            spriteBatch.Draw(texture, new((int)position.X + 35, (int)position.Y + 35, height, width), null, Color.Gray, 0, origin, (SpriteEffects)facing, 0f);
-        }
-
-        public void Update(double deltaTime)
-        {
-            //if (isActive) Activate();
-            //else Deactivate();
+            spriteBatch.Draw(texture, new((int)position.X + 35, (int)position.Y + 35, height, width), null, GameColors.foreGround, 0, origin, (SpriteEffects)facing, 0f);
         }
 
         public void Activate()

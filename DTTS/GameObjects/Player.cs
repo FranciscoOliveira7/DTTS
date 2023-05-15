@@ -15,8 +15,7 @@ namespace DTTS.GameObjects
     {
         Vector2 velocity;
         float speed, gravity, jumpPower;
-        bool isJumping, isDead;
-        public bool isFacingRight;
+        public bool isFacingRight, isDead, isJumping;
         float angle;
         public int score;
         Vector2 origin;
@@ -44,7 +43,7 @@ namespace DTTS.GameObjects
             HandleCollision(gameObjects);
             Angle(deltaTime);
 
-            position += velocity;
+            position += (velocity * (float)deltaTime) * 60;
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -78,39 +77,35 @@ namespace DTTS.GameObjects
                 if ((velocity.Y > 0 && IsTouchingTop(gameOject)) ||
                     (velocity.Y < 0 && IsTouchingBottom(gameOject)))
                 {
+                    velocity.Y = 0;
                     if (gameOject.objectType == "wall")
                     {
-                        velocity.Y = 0;
-                        isDead = true;
+                        if (!isDead) Die();
                         Jump();
                     }
                     if (gameOject.objectType == "spike")
-                        velocity.Y = 0;
+                    {
+                        velocity.X = 0;
+                        speed *= -1;
+                        if (!isDead) Die();
+                    }
                 }
 
                 if ((velocity.X < 0 && IsTouchingRight(gameOject)) ||
                     (velocity.X > 0 && IsTouchingLeft(gameOject)))
                 {
+                    velocity.X = 0;
+                    speed *= -1;
                     if (gameOject.objectType == "wall")
                     {
-                        velocity.X = 0;
-                        speed += 0.1f;
-                        speed *= -1;
+                        speed += (speed > 0 ? .1f : -.1f);
                         if (!isDead)
                         {
                             isFacingRight = !isFacingRight;
-                            score++;
+                            Score();
                         }
                     }
-                    if (gameOject.objectType == "spike")
-                    {
-                        velocity.X = 0;
-                        speed *= -1;
-                        if (!isDead)
-                        {
-                            isDead = true;
-                        }
-                    }
+                    if (gameOject.objectType == "spike" && !isDead) Die();
                 }
             }
         }
@@ -149,6 +144,32 @@ namespace DTTS.GameObjects
             velocity.Y = 0;
             velocity.Y -= jumpPower;
             isJumping = true;
+            Sounds.jump.Play(volume: 0.5f, pitch: 0.0f, pan: 0.0f);
+        }
+
+        public void Restart()
+        {
+            speed = 6;
+            position = new(315, 395);
+            isFacingRight = true;
+            isDead = false;
+            angle = 0;
+            velocity = new(0, 0);
+            isJumping = false;
+            score = 0;
+        }
+
+        public void Die()
+        {
+            speed = (speed > 0 ? 20 : -20); // Bounces faster (funny)
+            isDead = true;
+            Sounds.death.Play(volume: 0.3f, pitch: 0.0f, pan: 0.0f);
+        }
+
+        public void Score()
+        {
+            score++;
+            Sounds.score.Play(volume: 0.1f, pitch: 0.0f, pan: 0.0f);
         }
     }
 }

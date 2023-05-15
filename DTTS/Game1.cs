@@ -1,5 +1,6 @@
 ﻿using DTTS.GameObjects;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -14,6 +15,7 @@ namespace DTTS
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+        private SpriteFont mainFont;
         private SpriteFont scoreFont;
         private Texture2D scoreCircle;
 
@@ -30,6 +32,8 @@ namespace DTTS
         // All gameObjects list for the player's collision check
         private List<GameObject> gameObjects = new List<GameObject>();
 
+        bool hasGameStarted, hasPressedSpace;
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -44,6 +48,8 @@ namespace DTTS
             _graphics.PreferredBackBufferHeight = gameHeight; //definição da altura
             _graphics.PreferredBackBufferWidth = gameWidth; //definição da largura
             _graphics.ApplyChanges();
+            hasGameStarted = hasPressedSpace = false;
+            wasFacingRight = true;
 
             base.Initialize();
         }
@@ -52,6 +58,11 @@ namespace DTTS
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            Sounds.death = Content.Load<SoundEffect>("death");
+            Sounds.jump = Content.Load<SoundEffect>("jump");
+            Sounds.score = Content.Load<SoundEffect>("score");
+
+            mainFont = Content.Load<SpriteFont>("MainFont");
             scoreFont = Content.Load<SpriteFont>("ScoreFont");
             scoreCircle = Content.Load<Texture2D>("Circle");
 
@@ -96,33 +107,15 @@ namespace DTTS
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            player.Update(deltaTime, gameObjects);
+            if (hasGameStarted) MainGame(deltaTime);
 
-            for (int i = 0; i < numOfSpikes; i++)
-                for (int j = 0; j < 2; j++)
-                    spikes[i,j].Update(deltaTime);
-
-            if (player.HasTurned(wasFacingRight))
+            if (Keyboard.GetState().IsKeyDown(Keys.Space) && !hasPressedSpace)
             {
-                for (int i = 0; i < numOfSpikes; i++)
-                {
-                    spikes[i, (player.isFacingRight ? 0 : 1)].Deactivate();
-                }
-
-                Random rnd = new Random();
-                int spikeNumber = rnd.Next(numOfSpikes);
-
-                for (int j = 0; j < 3; j++)
-                {
-                    while (spikes[spikeNumber, (player.isFacingRight ? 1 : 0)].isActive)
-                    {
-                        spikeNumber = rnd.Next(numOfSpikes);
-                    }
-                    spikes[spikeNumber, (player.isFacingRight ? 1 : 0)].Activate();
-                }
-                wasFacingRight = player.isFacingRight;
+                if (player.isDead) Restart();
+                else hasGameStarted = true;
+                hasPressedSpace = true;
             }
-
+            if (Keyboard.GetState().IsKeyUp(Keys.Space)) hasPressedSpace = false;
 
             // TODO: Add your update logic here
 
@@ -131,12 +124,20 @@ namespace DTTS
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.LightGray);
+            GraphicsDevice.Clear(GameColors.backGround);
 
             _spriteBatch.Begin();
 
-            _spriteBatch.Draw(scoreCircle, new((int)gameWidth / 2 - 125, (int)gameHeight / 2 - 125, 250, 250), null, Color.White, 0, new Vector2(0,0), SpriteEffects.None, 0f);
-            _spriteBatch.DrawString(scoreFont, player.score.ToString("00"), new Vector2(gameWidth / 2 - 68, gameHeight / 2 - 73), Color.LightGray);
+            if (player.isDead)
+                _spriteBatch.DrawString(mainFont, player.score.ToString("Press space to Restart"), new Vector2(106, gameHeight / 2 + 150), Color.White);
+
+            if (hasGameStarted)
+            {
+                _spriteBatch.Draw(scoreCircle, new((int)gameWidth / 2 - 125, (int)gameHeight / 2 - 125, 250, 250), null, Color.White, 0, new Vector2(0,0), SpriteEffects.None, 0f);
+                _spriteBatch.DrawString(scoreFont, player.score.ToString("00"), new Vector2(gameWidth / 2 - 68, gameHeight / 2 - 73), GameColors.backGround);
+            }
+            else
+                _spriteBatch.DrawString(mainFont, player.score.ToString("Press space to Start"), new Vector2(135, gameHeight / 2 + 150), Color.White);
 
             player.Draw(_spriteBatch);
 
@@ -150,6 +151,49 @@ namespace DTTS
             // TODO: Add your drawing code here
 
             base.Draw(gameTime);
+        }
+
+        protected void MainGame(double deltaTime)
+        {
+            player.Update(deltaTime, gameObjects);
+            HandlePlayerScore();
+        }
+
+        protected void Restart()
+        {
+            hasGameStarted = false;
+            player.Restart();
+            for (int i = 0; i < numOfSpikes; i++)
+                for (int j = 0; j < 2; j++)
+                    spikes[i, j].Deactivate();
+            GameColors.foreGround = Color.Gray;
+            GameColors.backGround = Color.LightGray;
+        }
+
+        protected void HandlePlayerScore()
+        {
+            //If the player has turned, activate 3 random spikes on the other side
+            if (player.HasTurned(wasFacingRight))
+            {
+                for (int i = 0; i < numOfSpikes; i++)
+                {
+                    spikes[i, (player.isFacingRight ? 0 : 1)].Deactivate();
+                }
+
+                Random rnd = new Random();
+                int spikeNumber = rnd.Next(numOfSpikes);
+
+                for (int j = 0; j < 3; j++)
+                {
+                    //Find a deactive spike to activate
+                    while (spikes[spikeNumber, (player.isFacingRight ? 1 : 0)].isActive)
+                        spikeNumber = rnd.Next(numOfSpikes);
+
+                    spikes[spikeNumber, (player.isFacingRight ? 1 : 0)].Activate();
+                }
+                GameColors.UpdateColor(player.score);
+                wasFacingRight = player.isFacingRight;
+            }
         }
     }
 }
