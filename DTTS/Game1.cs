@@ -24,6 +24,8 @@ namespace DTTS
         private Player player;
         bool wasFacingRight;
 
+        int highScore;
+
         private Wall wallTop, wallBottom, wallLeft, wallRight;
 
         private const int numOfSpikes = 7;
@@ -129,7 +131,7 @@ namespace DTTS
             _spriteBatch.Begin();
 
             if (player.isDead)
-                _spriteBatch.DrawString(mainFont, player.score.ToString("Press space to Restart"), new Vector2(106, gameHeight / 2 + 150), Color.White);
+                _spriteBatch.DrawString(mainFont, "Press space to Restart", new Vector2(106, gameHeight / 2 + 150), Color.White);
 
             if (hasGameStarted)
             {
@@ -137,7 +139,10 @@ namespace DTTS
                 _spriteBatch.DrawString(scoreFont, player.score.ToString("00"), new Vector2(gameWidth / 2 - 68, gameHeight / 2 - 73), GameColors.backGround);
             }
             else
-                _spriteBatch.DrawString(mainFont, player.score.ToString("Press space to Start"), new Vector2(135, gameHeight / 2 + 150), Color.White);
+            {
+                _spriteBatch.DrawString(mainFont, "High Score: " + highScore, new Vector2(205, 100), Color.White);
+                _spriteBatch.DrawString(mainFont, "Press space to Start", new Vector2(135, gameHeight / 2 + 150), Color.White);
+            }
 
             player.Draw(_spriteBatch);
 
@@ -161,6 +166,7 @@ namespace DTTS
 
         protected void Restart()
         {
+            if (highScore < player.score) highScore = player.score;
             hasGameStarted = false;
             player.Restart();
             for (int i = 0; i < numOfSpikes; i++)
