@@ -25,20 +25,20 @@ namespace DTTS
                     backGround = Color.LightGray;
                     break;
                 case 15:
-                    foreGround = Color.Yellow;
-                    backGround = Color.LightYellow;
-                    break;
-                case 20:
                     foreGround = Color.Green;
                     backGround = Color.LightGreen;
                     break;
-                case 25:
-                    foreGround = Color.Cyan;
-                    backGround = Color.LightCyan;
+                case 20:
+                    foreGround = Color.DarkCyan;
+                    backGround = new Color(191, 226, 233);
                     break;
-                case 30:
+                case 25:
                     foreGround = Color.DarkRed;
                     backGround = Color.IndianRed;
+                    break;
+                case 30:
+                    foreGround = Color.Indigo;
+                    backGround = Color.MediumPurple;
                     break;
                 case 35:
                     foreGround = Color.Black;
