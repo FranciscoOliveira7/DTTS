@@ -19,7 +19,7 @@ namespace DTTS.GameObjects
             this.position = position;
             this.height = height;
             this.width = width;
-            this.objectType = "wall";
+            objectType = objectType.wall;
         }
 
         public override void Draw(SpriteBatch spriteBatch)

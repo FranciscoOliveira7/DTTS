@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection.Emit;
 using System.Reflection.Metadata;
 
@@ -24,15 +25,17 @@ namespace DTTS
         private Player player;
         bool wasFacingRight;
 
-        int highScore;
+        PlayerStats highScore = new PlayerStats();
 
         private Wall wallTop, wallBottom, wallLeft, wallRight;
 
         private const int numOfSpikes = 7;
         private Spike[,] spikes = new Spike[numOfSpikes,numOfSpikes];
 
+        private Collectable powerUp;
+
         // All gameObjects list for the player's collision check
-        private List<GameObject> gameObjects = new List<GameObject>();
+        private List<GameObject> collisionObjects = new List<GameObject>();
 
         bool hasGameStarted, hasPressedSpace;
 
@@ -52,6 +55,10 @@ namespace DTTS
             _graphics.ApplyChanges();
             hasGameStarted = hasPressedSpace = false;
             wasFacingRight = true;
+            //if ((highScore = FileUtil.LoadScore()) == null) { }
+
+            highScore = FileUtil.LoadScore();
+            if (highScore == null) highScore.score = 0;
 
             base.Initialize();
         }
@@ -70,6 +77,8 @@ namespace DTTS
 
             player = new Player(Content.Load<Texture2D>("Bird"), new Vector2(gameWidth / 2 - 35, gameHeight / 2 - 35));
 
+            powerUp = new Invincibility(Content.Load<Texture2D>("Square"), new Vector2(gameWidth / 2 + 200, gameHeight / 2));
+
             wallTop = new Wall(Content.Load<Texture2D>("Square"), new Vector2(0, 0), gameWidth, 50);
             wallBottom = new Wall(Content.Load<Texture2D>("Square"), new Vector2(0, gameHeight - 50), gameWidth, 50);
             wallLeft = new Wall(Content.Load<Texture2D>("Square"), new Vector2(0, 50), 50, gameHeight - 100);
@@ -86,14 +95,15 @@ namespace DTTS
                 spikes[i,1] = new Spike(Content.Load<Texture2D>("Spike"), new Vector2(gameWidth - 58, posY), Facing.left);
             }
 
-            gameObjects.Add(wallTop);
-            gameObjects.Add(wallBottom);
-            gameObjects.Add(wallLeft);
-            gameObjects.Add(wallRight);
+            collisionObjects.Add(wallTop);
+            collisionObjects.Add(wallBottom);
+            collisionObjects.Add(wallLeft);
+            collisionObjects.Add(wallRight);
+            collisionObjects.Add(powerUp);
 
             for (int i = 0; i < numOfSpikes; i++)
                 for (int j = 0; j < 2; j++)
-                    gameObjects.Add(spikes[i, j]);
+                    collisionObjects.Add(spikes[i, j]);
 
             for (int i = 0; i < numOfSpikes; i++)
                 for (int j = 0; j < 2; j++)
@@ -107,21 +117,24 @@ namespace DTTS
             double deltaTime = gameTime.ElapsedGameTime.TotalSeconds;
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            if (hasGameStarted) MainGame(deltaTime);
-
-            if (Keyboard.GetState().IsKeyDown(Keys.Space) && !hasPressedSpace)
             {
-                if (player.isDead) Restart();
-                else hasGameStarted = true;
-                hasPressedSpace = true;
+                FileUtil.SaveScore(highScore);
+                Exit();
             }
-            if (Keyboard.GetState().IsKeyUp(Keys.Space)) hasPressedSpace = false;
+            else
+            {
+                if (hasGameStarted) MainGame(deltaTime);
 
-            // TODO: Add your update logic here
+                if (Keyboard.GetState().IsKeyDown(Keys.Space) && !hasPressedSpace)
+                {
+                    if (player.isDead) Restart();
+                    else hasGameStarted = true;
+                    hasPressedSpace = true;
+                }
+                if (Keyboard.GetState().IsKeyUp(Keys.Space)) hasPressedSpace = false;
 
-            base.Update(gameTime);
+                base.Update(gameTime);
+            }
         }
 
         protected override void Draw(GameTime gameTime)
@@ -140,33 +153,37 @@ namespace DTTS
             }
             else
             {
-                _spriteBatch.DrawString(mainFont, "High Score: " + highScore, new Vector2(205, 100), Color.White);
+                _spriteBatch.DrawString(mainFont, "High Score: " + highScore.score, new Vector2(205, 100), Color.White);
                 _spriteBatch.DrawString(mainFont, "Press space to Start", new Vector2(135, gameHeight / 2 + 150), Color.White);
             }
 
             player.Draw(_spriteBatch);
 
-            foreach (var gameObject in gameObjects)
+            foreach (var gameObject in collisionObjects)
             {
                 gameObject.Draw(_spriteBatch);
             }
 
-            _spriteBatch.End();
+            powerUp.Draw(_spriteBatch);
 
-            // TODO: Add your drawing code here
+            _spriteBatch.End();
 
             base.Draw(gameTime);
         }
 
         protected void MainGame(double deltaTime)
         {
-            player.Update(deltaTime, gameObjects);
+            player.Update(deltaTime, collisionObjects);
             HandlePlayerScore();
+            if (Keyboard.GetState().IsKeyDown(Keys.F))
+            { 
+                powerUp.Spawn();
+            }
         }
 
         protected void Restart()
         {
-            if (highScore < player.score) highScore = player.score;
+            if (highScore.score < player.score) highScore.score = player.score;
             hasGameStarted = false;
             player.Restart();
             for (int i = 0; i < numOfSpikes; i++)
@@ -198,6 +215,7 @@ namespace DTTS
                     spikes[spikeNumber, (player.isFacingRight ? 1 : 0)].Activate();
                 }
                 GameColors.UpdateColor(player.score);
+                
                 wasFacingRight = player.isFacingRight;
             }
         }

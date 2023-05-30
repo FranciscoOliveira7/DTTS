@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,24 +16,27 @@ namespace DTTS.GameObjects
     {
         Vector2 velocity;
         float speed, gravity, jumpPower;
-        public bool isFacingRight, isDead, isJumping;
+        public bool isFacingRight, isDead, isJumping, isInvincible;
         float angle;
         public int score;
         Vector2 origin;
-        Color playerColor;
+        Collectable powerup;
+
+        // Player's hitbox
+        public override Rectangle HitBox
+        {
+            get => new Rectangle((int)position.X, (int)position.Y + 8, width, height - 16);
+        }
 
         //Contructor
         public Player(Texture2D texture, Vector2 position) : base(texture, position)
         {
-            this.texture = texture;
             speed = 6;
             gravity = 25;
             jumpPower = 10;
-            this.position = position;
             origin = new Vector2(texture.Width / 2, texture.Height / 2);
             isFacingRight = true;
-            playerColor = Color.White;
-            isDead = false;
+            isDead = isInvincible = false;
         }
 
         //Update method (is executed every tick)
@@ -43,6 +47,9 @@ namespace DTTS.GameObjects
             HandleCollision(gameObjects);
             Angle(deltaTime);
 
+            if (Keyboard.GetState().IsKeyDown(Keys.Enter))
+                UseCollectable();
+
             position += (velocity * (float)deltaTime) * 60;
         }
 
@@ -51,7 +58,7 @@ namespace DTTS.GameObjects
             //spriteBatch.Draw(texture, HitBox, Color.White);
 
             // Draw with rotarion
-            spriteBatch.Draw(texture, new ((int)position.X + 35, (int)position.Y + 35, height, width), null, playerColor, angle, origin, (isFacingRight ? SpriteEffects.None : SpriteEffects.FlipHorizontally) , 0f);
+            spriteBatch.Draw(texture, new ((int)position.X + 35, (int)position.Y + 35, height, width), null, Color.White, angle, origin, (isFacingRight ? SpriteEffects.None : SpriteEffects.FlipHorizontally) , 0f);
         }
 
         public void Movement(double deltaTime)
@@ -77,35 +84,47 @@ namespace DTTS.GameObjects
                 if ((velocity.Y > 0 && IsTouchingTop(gameOject)) ||
                     (velocity.Y < 0 && IsTouchingBottom(gameOject)))
                 {
-                    velocity.Y = 0;
-                    if (gameOject.objectType == "wall")
+                    if (gameOject.objectType == objectType.wall)
                     {
-                        if (!isDead) Die();
+                        velocity.Y = 0;
+                        if (!isDead && !isInvincible) Die();
                         Jump();
                     }
-                    if (gameOject.objectType == "spike")
+                    if (gameOject.objectType == objectType.spike && !isInvincible)
                     {
-                        velocity.X = 0;
-                        speed *= -1;
+                        velocity.Y = 0;
                         if (!isDead) Die();
+                    }
+                    if (gameOject.objectType == objectType.collectable)
+                    {
+                        powerup = (Collectable)gameOject;
                     }
                 }
 
                 if ((velocity.X < 0 && IsTouchingRight(gameOject)) ||
                     (velocity.X > 0 && IsTouchingLeft(gameOject)))
                 {
-                    velocity.X = 0;
-                    speed *= -1;
-                    if (gameOject.objectType == "wall")
+                    if (gameOject.objectType == objectType.wall)
                     {
+                        velocity.X = 0;
+                        speed *= -1;
                         speed += (speed > 0 ? .1f : -.1f);
                         if (!isDead)
                         {
                             isFacingRight = !isFacingRight;
-                            Score();
+                            Score();    
                         }
                     }
-                    if (gameOject.objectType == "spike" && !isDead) Die();
+                    if (gameOject.objectType == objectType.spike && !isInvincible)
+                    {
+                        velocity.X = 0;
+                        speed *= -1;
+                        if (!isDead) Die();
+                    }
+                    if (gameOject.objectType == objectType.collectable)
+                    {
+                        powerup = (Collectable)gameOject;
+                    }
                 }
             }
         }
@@ -157,6 +176,7 @@ namespace DTTS.GameObjects
             velocity = new(0, 0);
             isJumping = false;
             score = 0;
+            isInvincible = false;
         }
 
         public void Die()
@@ -168,8 +188,22 @@ namespace DTTS.GameObjects
 
         public void Score()
         {
-            score++;
+            score -= -1;
             Sounds.score.Play(volume: 0.1f, pitch: 0.0f, pan: 0.0f);
+            //if (isInvincible) isInvincible = false;
+        }
+
+        public void UseCollectable()
+        {
+            switch (powerup)
+            {
+                case Invincibility:
+                    isInvincible = true;
+                    break;
+
+                default:
+                    break;
+            }
         }
     }
 }
