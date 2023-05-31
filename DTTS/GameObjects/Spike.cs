@@ -34,7 +34,7 @@ namespace DTTS.GameObjects
             height = 80;
             width = 80;
             origin = new Vector2(texture.Width / 2, texture.Height / 2);
-            objectType = objectType.spike;
+            objectType = ObjectType.spike;
             activePosition = position.X;
         }
 

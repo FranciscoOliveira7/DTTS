@@ -1,4 +1,5 @@
 ﻿using DTTS.GameObjects;
+using DTTS.GameObjects.Collectables;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
@@ -16,6 +17,8 @@ namespace DTTS
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+        DrawingUtil draw; // Simple drawing utiliy
+
         private SpriteFont mainFont;
         private SpriteFont scoreFont;
         private Texture2D scoreCircle;
@@ -32,12 +35,17 @@ namespace DTTS
         private const int numOfSpikes = 7;
         private Spike[,] spikes = new Spike[numOfSpikes,numOfSpikes];
 
-        private Collectable powerUp;
+        private List<Collectable> powerUps = new List<Collectable>();
+        private Invincibility invincibility;
+        private SlowMotion slowmotion;
+        ProgressionBar powerUpProgressBar;
 
         // All gameObjects list for the player's collision check
-        private List<GameObject> collisionObjects = new List<GameObject>();
+        private List<GameObject> colliders = new List<GameObject>();
 
-        bool hasGameStarted, hasPressedSpace;
+        // flags
+        bool hasGameStarted, hasPressedSpace, hasPowerUpSpawned;
+        private int nextPowerUp;
 
         public Game1()
         {
@@ -53,12 +61,12 @@ namespace DTTS
             _graphics.PreferredBackBufferHeight = gameHeight; //definição da altura
             _graphics.PreferredBackBufferWidth = gameWidth; //definição da largura
             _graphics.ApplyChanges();
-            hasGameStarted = hasPressedSpace = false;
+            hasGameStarted = hasPressedSpace = hasGameStarted = false;
             wasFacingRight = true;
             //if ((highScore = FileUtil.LoadScore()) == null) { }
 
             highScore = FileUtil.LoadScore();
-            if (highScore == null) highScore.score = 0;
+            if (highScore == null) highScore = new PlayerStats(0);
 
             base.Initialize();
         }
@@ -67,9 +75,9 @@ namespace DTTS
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            Sounds.death = Content.Load<SoundEffect>("death");
-            Sounds.jump = Content.Load<SoundEffect>("jump");
-            Sounds.score = Content.Load<SoundEffect>("score");
+            draw = new DrawingUtil(GraphicsDevice, _spriteBatch);
+
+            Sounds.LoadSounds(Content);
 
             mainFont = Content.Load<SpriteFont>("MainFont");
             scoreFont = Content.Load<SpriteFont>("ScoreFont");
@@ -77,13 +85,24 @@ namespace DTTS
 
             player = new Player(Content.Load<Texture2D>("Bird"), new Vector2(gameWidth / 2 - 35, gameHeight / 2 - 35));
 
-            powerUp = new Invincibility(Content.Load<Texture2D>("Square"), new Vector2(gameWidth / 2 + 200, gameHeight / 2));
+            // Powerup Progress Bar
+            powerUpProgressBar = new ProgressionBar(new Rectangle(gameWidth / 2 - 50, 75, 100, 6), draw);
 
+            // Power Ups
+            invincibility = new Invincibility(Content.Load<Texture2D>("star"), new Vector2(gameWidth / 2 + 200, gameHeight / 2), powerUpProgressBar);
+            invincibility.Despawn();
+            powerUps.Add(invincibility);
+            slowmotion = new SlowMotion(Content.Load<Texture2D>("slowmotion"), new Vector2(gameWidth / 2 + 200, gameHeight / 2), powerUpProgressBar);
+            powerUps.Add(slowmotion);
+
+            #region walls
             wallTop = new Wall(Content.Load<Texture2D>("Square"), new Vector2(0, 0), gameWidth, 50);
             wallBottom = new Wall(Content.Load<Texture2D>("Square"), new Vector2(0, gameHeight - 50), gameWidth, 50);
             wallLeft = new Wall(Content.Load<Texture2D>("Square"), new Vector2(0, 50), 50, gameHeight - 100);
             wallRight = new Wall(Content.Load<Texture2D>("Square"), new Vector2(gameWidth - 50, 50), 50, gameHeight);
+            #endregion
 
+            #region spikes
             for (int i = 0; i < numOfSpikes; i++)
             {
                 int posY = (i + 1) * 90 + 30;
@@ -94,22 +113,23 @@ namespace DTTS
                 int posY = (i + 1) * 90 + 30;
                 spikes[i,1] = new Spike(Content.Load<Texture2D>("Spike"), new Vector2(gameWidth - 58, posY), Facing.left);
             }
+            #endregion
 
-            collisionObjects.Add(wallTop);
-            collisionObjects.Add(wallBottom);
-            collisionObjects.Add(wallLeft);
-            collisionObjects.Add(wallRight);
-            collisionObjects.Add(powerUp);
+            #region adding to colliders list
+            colliders.Add(wallTop);
+            colliders.Add(wallBottom);
+            colliders.Add(wallLeft);
+            colliders.Add(wallRight);
+            colliders.AddRange(powerUps);
 
             for (int i = 0; i < numOfSpikes; i++)
                 for (int j = 0; j < 2; j++)
-                    collisionObjects.Add(spikes[i, j]);
+                    colliders.Add(spikes[i, j]);
 
             for (int i = 0; i < numOfSpikes; i++)
                 for (int j = 0; j < 2; j++)
                     spikes[i, j].Deactivate();
-
-            // TODO: use this.Content to load your game content here
+            #endregion
         }
 
         protected override void Update(GameTime gameTime)
@@ -135,6 +155,10 @@ namespace DTTS
 
                 base.Update(gameTime);
             }
+            if (Keyboard.GetState().IsKeyDown(Keys.R))
+            {
+                Restart();
+            }
         }
 
         protected override void Draw(GameTime gameTime)
@@ -159,12 +183,10 @@ namespace DTTS
 
             player.Draw(_spriteBatch);
 
-            foreach (var gameObject in collisionObjects)
+            foreach (var gameObject in colliders)
             {
                 gameObject.Draw(_spriteBatch);
             }
-
-            powerUp.Draw(_spriteBatch);
 
             _spriteBatch.End();
 
@@ -173,11 +195,11 @@ namespace DTTS
 
         protected void MainGame(double deltaTime)
         {
-            player.Update(deltaTime, collisionObjects);
+            player.Update(deltaTime, colliders);
             HandlePlayerScore();
             if (Keyboard.GetState().IsKeyDown(Keys.F))
-            { 
-                powerUp.Spawn();
+            {
+                powerUps[0].Spawn(player.isFacingRight);
             }
         }
 
@@ -189,6 +211,10 @@ namespace DTTS
             for (int i = 0; i < numOfSpikes; i++)
                 for (int j = 0; j < 2; j++)
                     spikes[i, j].Deactivate();
+
+            foreach (var powerup in powerUps)
+                powerup.Despawn();
+
             GameColors.foreGround = Color.Gray;
             GameColors.backGround = Color.LightGray;
         }
@@ -198,12 +224,19 @@ namespace DTTS
             //If the player has turned, activate 3 random spikes on the other side
             if (player.HasTurned(wasFacingRight))
             {
+                Random rnd = new Random();
+
+                if (!hasPowerUpSpawned)
+                {
+                    int poweUpNumber = rnd.Next(powerUps.Count);
+                    powerUps[poweUpNumber].Spawn(player.isFacingRight);
+                }
+
                 for (int i = 0; i < numOfSpikes; i++)
                 {
                     spikes[i, (player.isFacingRight ? 0 : 1)].Deactivate();
                 }
 
-                Random rnd = new Random();
                 int spikeNumber = rnd.Next(numOfSpikes);
 
                 for (int j = 0; j < 3; j++)

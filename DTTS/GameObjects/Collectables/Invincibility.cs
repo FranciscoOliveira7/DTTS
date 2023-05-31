@@ -6,16 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DTTS.GameObjects
+namespace DTTS.GameObjects.Collectables
 {
     public class Invincibility : Collectable
     {
-        public bool isInvicible;
-
-        public Invincibility(Texture2D texture, Vector2 position) : base(texture, position)
+        public Invincibility(Texture2D texture, Vector2 position, ProgressionBar progressBar) : base(texture, position, progressBar)
         {
-            this.texture = texture;
-            this.position = position;
+            duration = 5;
+            // ¯\_(ツ)_/¯
         }
     }
 }

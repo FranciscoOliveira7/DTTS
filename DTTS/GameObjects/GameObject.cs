@@ -11,7 +11,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace DTTS.GameObjects
 {
-    public enum objectType
+    public enum ObjectType
     {
         wall, spike, player, collectable
     }
@@ -23,7 +23,7 @@ namespace DTTS.GameObjects
         Vector2 velocity;
         public Vector2 position;
         public int height = 70, width = 70;
-        public objectType objectType;
+        public ObjectType objectType;
 
         // Object's Hitbox
         public virtual Rectangle HitBox
@@ -40,7 +40,7 @@ namespace DTTS.GameObjects
 
         public virtual void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, HitBox, GameColors.foreGround);
+            spriteBatch.Draw(texture, HitBox, Color.White);
 
             // Draw with rotarion
             //spriteBatch.Draw(texture, Rectangle, null, Color.White, angle, new Vector2(texture.Width / 2, texture.Height / 2), SpriteEffects.None, 0f);

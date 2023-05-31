@@ -33,10 +33,16 @@ namespace DTTS
             {
                 StreamReader file = new StreamReader(fileName);
                 XmlSerializer serializer = new XmlSerializer(typeof(PlayerStats));
-                PlayerStats playerStats = (PlayerStats)serializer.Deserialize(file);
-                file.Close();
-
-                return playerStats;
+                try
+                {
+                    PlayerStats playerStats = (PlayerStats)serializer.Deserialize(file);
+                    file.Close();
+                    return playerStats;
+                }  
+                catch {
+                    file.Close();
+                    return null;
+                }
             }
             else return null;
         }

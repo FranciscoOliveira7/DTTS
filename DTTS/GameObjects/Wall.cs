@@ -19,13 +19,12 @@ namespace DTTS.GameObjects
             this.position = position;
             this.height = height;
             this.width = width;
-            objectType = objectType.wall;
+            objectType = ObjectType.wall;
         }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(texture, HitBox, GameColors.foreGround);
-            //spriteBatch.Draw(texture, HitBox, null, Color.White * Alpha, 0, Vector2.Zero, Scale, Orientation, 0);
         }
     }
 }

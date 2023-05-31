@@ -10,5 +10,15 @@ namespace DTTS
     public class PlayerStats
     {
         public int score;
+
+        public PlayerStats()
+        {
+            this.score = 0;
+        }
+
+        public PlayerStats(int score)
+        {
+            this.score = score;
+        }
     }
 }

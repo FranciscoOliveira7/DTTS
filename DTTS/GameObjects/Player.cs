@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using DTTS.GameObjects.Collectables;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -15,7 +16,7 @@ namespace DTTS.GameObjects
     public class Player : GameObject
     {
         Vector2 velocity;
-        float speed, gravity, jumpPower;
+        float speed, gravity, jumpPower, acceleration, timeScale;
         public bool isFacingRight, isDead, isJumping, isInvincible;
         float angle;
         public int score;
@@ -32,11 +33,14 @@ namespace DTTS.GameObjects
         public Player(Texture2D texture, Vector2 position) : base(texture, position)
         {
             speed = 6;
+            timeScale = 1;
+            acceleration = .1f;
             gravity = 25;
             jumpPower = 10;
             origin = new Vector2(texture.Width / 2, texture.Height / 2);
             isFacingRight = true;
             isDead = isInvincible = false;
+            powerup = null;
         }
 
         //Update method (is executed every tick)
@@ -44,13 +48,11 @@ namespace DTTS.GameObjects
         {
             Movement(deltaTime);
             Gravity(deltaTime);
+            HandlePowerUp(deltaTime);
             HandleCollision(gameObjects);
             Angle(deltaTime);
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Enter))
-                UseCollectable();
-
-            position += (velocity * (float)deltaTime) * 60;
+            position += ((velocity * (float)deltaTime) * 60) * timeScale;
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -84,46 +86,45 @@ namespace DTTS.GameObjects
                 if ((velocity.Y > 0 && IsTouchingTop(gameOject)) ||
                     (velocity.Y < 0 && IsTouchingBottom(gameOject)))
                 {
-                    if (gameOject.objectType == objectType.wall)
+                    if (gameOject.objectType == ObjectType.wall)
                     {
                         velocity.Y = 0;
-                        if (!isDead && !isInvincible) Die();
+                        if (!isDead) Die();
                         Jump();
                     }
-                    if (gameOject.objectType == objectType.spike && !isInvincible)
+                    if (gameOject.objectType == ObjectType.spike && !isInvincible)
                     {
                         velocity.Y = 0;
                         if (!isDead) Die();
                     }
-                    if (gameOject.objectType == objectType.collectable)
+                    if (gameOject.objectType == ObjectType.collectable && !isDead)
                     {
-                        powerup = (Collectable)gameOject;
+                        Collect((Collectable)gameOject);
                     }
                 }
 
                 if ((velocity.X < 0 && IsTouchingRight(gameOject)) ||
                     (velocity.X > 0 && IsTouchingLeft(gameOject)))
                 {
-                    if (gameOject.objectType == objectType.wall)
+                    if (gameOject.objectType == ObjectType.wall)
                     {
                         velocity.X = 0;
                         speed *= -1;
-                        speed += (speed > 0 ? .1f : -.1f);
                         if (!isDead)
                         {
                             isFacingRight = !isFacingRight;
                             Score();    
                         }
                     }
-                    if (gameOject.objectType == objectType.spike && !isInvincible)
+                    if (gameOject.objectType == ObjectType.spike && !isInvincible)
                     {
                         velocity.X = 0;
                         speed *= -1;
                         if (!isDead) Die();
                     }
-                    if (gameOject.objectType == objectType.collectable)
+                    if (gameOject.objectType == ObjectType.collectable && !isDead)
                     {
-                        powerup = (Collectable)gameOject;
+                        Collect((Collectable)gameOject);
                     }
                 }
             }
@@ -133,20 +134,10 @@ namespace DTTS.GameObjects
         {
             if (!isDead)
             {
-                if ((isFacingRight ? velocity.Y < 0 : velocity.Y > 0) )
-                {
-                    if (angle > -.1)
-                    {
-                        angle -= (float)(2f * deltaTime);
-                    }
-                }
-                else
-                {
-                    if (angle < .1)
-                    {
-                        angle += (float)(1.5f * deltaTime);
-                    }
-                }
+                if ((isFacingRight ? velocity.Y < 0 : velocity.Y > 0) && angle > -.1)
+                    angle -= (float)(2f * deltaTime);
+
+                else if (angle < .1) angle += (float)(1.5f * deltaTime);
             }
             else
             {
@@ -154,7 +145,7 @@ namespace DTTS.GameObjects
             }
         }
 
-        public void Gravity(double deltaTime) => velocity.Y += (float)(gravity * deltaTime);
+        public void Gravity(double deltaTime) => velocity.Y += (float)(gravity * deltaTime) * timeScale;
 
         public bool HasTurned(bool wasFacingRight) => wasFacingRight != isFacingRight;
 
@@ -177,6 +168,7 @@ namespace DTTS.GameObjects
             isJumping = false;
             score = 0;
             isInvincible = false;
+            if (powerup != null) EndPowerUp();
         }
 
         public void Die()
@@ -188,22 +180,71 @@ namespace DTTS.GameObjects
 
         public void Score()
         {
+            speed += (speed > 0 ? acceleration : -acceleration);
             score -= -1;
             Sounds.score.Play(volume: 0.1f, pitch: 0.0f, pan: 0.0f);
-            //if (isInvincible) isInvincible = false;
         }
 
-        public void UseCollectable()
+        public void EndPowerUp()
         {
             switch (powerup)
             {
                 case Invincibility:
-                    isInvincible = true;
+                    Sounds.invincibilityInstance.Stop();
+                    isInvincible = false;
+                    break;
+
+                case SlowMotion:
+                    timeScale = 1;
                     break;
 
                 default:
                     break;
             }
+
+            powerup.elapsedTime = 0;
+            powerup.isActive = false;
+            powerup = null;
+        }
+
+        public void HandlePowerUp(double deltaTime)
+        {
+            if (powerup != null)
+            {
+                if (powerup.elapsedTime >= powerup.duration)
+                {
+                    EndPowerUp();
+                }
+                else powerup.elapsedTime += (float)deltaTime;
+            }
+        }
+
+        public void UsePowerUp()
+        {
+            switch (powerup)
+            {
+                case Invincibility:
+                    Sounds.invincibilityInstance.Play();
+                    powerup.isActive = isInvincible = true;
+                    break;
+
+                case SlowMotion:
+                    timeScale = 0.5f;
+                    powerup.isActive = true;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        private void Collect(Collectable powerup)
+        {
+            if (this.powerup != null) EndPowerUp();
+            this.powerup = powerup;
+            powerup.Despawn();
+            Sounds.pickup.Play(volume: .8f, pitch: 0.0f, pan: 0.0f);
+            UsePowerUp();
         }
     }
 }
