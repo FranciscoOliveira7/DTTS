@@ -207,6 +207,7 @@ namespace DTTS
         {
             if (highScore.score < player.score) highScore.score = player.score;
             hasGameStarted = false;
+            wasFacingRight = true;
             player.Restart();
             for (int i = 0; i < numOfSpikes; i++)
                 for (int j = 0; j < 2; j++)

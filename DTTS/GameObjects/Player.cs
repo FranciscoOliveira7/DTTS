@@ -229,7 +229,7 @@ namespace DTTS.GameObjects
                     break;
 
                 case SlowMotion:
-                    timeScale = 0.5f;
+                    timeScale = 0.7f;
                     powerup.isActive = true;
                     break;
 

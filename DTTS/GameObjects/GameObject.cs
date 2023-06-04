@@ -46,6 +46,7 @@ namespace DTTS.GameObjects
             //spriteBatch.Draw(texture, Rectangle, null, Color.White, angle, new Vector2(texture.Width / 2, texture.Height / 2), SpriteEffects.None, 0f);
         }
 
+        // Simple Collision check system (copied from a tutorial tho :/)
         #region Collisions
         protected bool IsTouchingLeft(GameObject gameObject)
         {
@@ -78,7 +79,6 @@ namespace DTTS.GameObjects
               this.HitBox.Right > gameObject.HitBox.Left &&
               this.HitBox.Left < gameObject.HitBox.Right;
         }
-
         #endregion
     }
 }
