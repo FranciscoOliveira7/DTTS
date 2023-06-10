@@ -16,12 +16,13 @@ namespace DTTS.GameObjects
     public class Player : GameObject
     {
         Vector2 velocity;
-        float speed, gravity, jumpPower, acceleration, timeScale;
+        private float speed, timeScale;
+        private readonly float jumpPower, gravity;
         public bool isFacingRight, isDead, isJumping, isInvincible;
         float angle;
         public int score;
         Vector2 origin;
-        Collectable powerup;
+        public Collectable powerup;
 
         // Player's hitbox
         public override Rectangle HitBox
@@ -34,7 +35,6 @@ namespace DTTS.GameObjects
         {
             speed = 6;
             timeScale = 1;
-            acceleration = .1f;
             gravity = 25;
             jumpPower = 10;
             origin = new Vector2(texture.Width / 2, texture.Height / 2);
@@ -46,7 +46,7 @@ namespace DTTS.GameObjects
         //Update method (is executed every tick)
         public void Update(double deltaTime, List<GameObject> gameObjects)
         {
-            Movement(deltaTime);
+            Movement();
             Gravity(deltaTime);
             HandlePowerUp(deltaTime);
             HandleCollision(gameObjects);
@@ -63,7 +63,7 @@ namespace DTTS.GameObjects
             spriteBatch.Draw(texture, new ((int)position.X + 35, (int)position.Y + 35, height, width), null, Color.White, angle, origin, (isFacingRight ? SpriteEffects.None : SpriteEffects.FlipHorizontally) , 0f);
         }
 
-        public void Movement(double deltaTime)
+        public void Movement()
         {
             if (!isDead)
             {
@@ -81,50 +81,51 @@ namespace DTTS.GameObjects
 
         public void HandleCollision(List<GameObject> gameObjects)
         {
-            foreach (GameObject gameOject in gameObjects)
+            foreach (GameObject gameObject in gameObjects)
             {
-                if ((velocity.Y > 0 && IsTouchingTop(gameOject)) ||
-                    (velocity.Y < 0 && IsTouchingBottom(gameOject)))
+                // Checks vertical collisions
+                if ((velocity.Y > 0 && IsTouchingTop(gameObject)) ||
+                    (velocity.Y < 0 && IsTouchingBottom(gameObject)))
                 {
-                    if (gameOject.objectType == ObjectType.wall)
+                    if (gameObject is Wall)
                     {
                         velocity.Y = 0;
                         if (!isDead) Die();
                         Jump();
                     }
-                    if (gameOject.objectType == ObjectType.spike && !isInvincible)
+                    if (gameObject is Spike && !isInvincible)
                     {
                         velocity.Y = 0;
                         if (!isDead) Die();
                     }
-                    if (gameOject.objectType == ObjectType.collectable && !isDead)
+                    if (gameObject is Collectable collectable && !isDead)
                     {
-                        Collect((Collectable)gameOject);
+                        Collect(collectable);
                     }
                 }
 
-                if ((velocity.X < 0 && IsTouchingRight(gameOject)) ||
-                    (velocity.X > 0 && IsTouchingLeft(gameOject)))
+                // Checks horizontal collisions
+                if ((velocity.X < 0 && IsTouchingRight(gameObject)) ||
+                    (velocity.X > 0 && IsTouchingLeft(gameObject)))
                 {
-                    if (gameOject.objectType == ObjectType.wall)
+                    if (gameObject is Wall)
                     {
                         velocity.X = 0;
                         speed *= -1;
                         if (!isDead)
                         {
-                            isFacingRight = !isFacingRight;
                             Score();    
                         }
                     }
-                    if (gameOject.objectType == ObjectType.spike && !isInvincible)
+                    if (gameObject is Spike && !isInvincible)
                     {
                         velocity.X = 0;
                         speed *= -1;
                         if (!isDead) Die();
                     }
-                    if (gameOject.objectType == ObjectType.collectable && !isDead)
+                    if (gameObject is Collectable collectable && !isDead)
                     {
-                        Collect((Collectable)gameOject);
+                        Collect(collectable);
                     }
                 }
             }
@@ -139,7 +140,7 @@ namespace DTTS.GameObjects
 
                 else if (angle < .1) angle += (float)(1.5f * deltaTime);
             }
-            else
+            else // Starts spinning when dead (funny)
             {
                 angle -= (float)(20 * deltaTime);
             }
@@ -180,13 +181,15 @@ namespace DTTS.GameObjects
 
         public void Score()
         {
-            speed += (speed > 0 ? acceleration : -acceleration);
+            isFacingRight = !isFacingRight;
             score -= -1;
             Sounds.score.Play(volume: 0.1f, pitch: 0.0f, pan: 0.0f);
         }
 
         public void EndPowerUp()
         {
+            if (powerup == null) return;
+
             switch (powerup)
             {
                 case Invincibility:
@@ -240,7 +243,7 @@ namespace DTTS.GameObjects
 
         private void Collect(Collectable powerup)
         {
-            if (this.powerup != null) EndPowerUp();
+            EndPowerUp();
             this.powerup = powerup;
             powerup.Despawn();
             Sounds.pickup.Play(volume: .8f, pitch: 0.0f, pan: 0.0f);

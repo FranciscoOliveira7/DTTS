@@ -33,19 +33,18 @@ namespace DTTS
         private Wall wallTop, wallBottom, wallLeft, wallRight;
 
         private const int numOfSpikes = 7;
-        private Spike[,] spikes = new Spike[numOfSpikes,numOfSpikes];
+        private readonly Spike[,] spikes = new Spike[numOfSpikes,numOfSpikes];
 
-        private List<Collectable> powerUps = new List<Collectable>();
+        private readonly List<Collectable> powerUps = new List<Collectable>();
         private Invincibility invincibility;
         private SlowMotion slowmotion;
         ProgressionBar powerUpProgressBar;
 
         // All gameObjects list for the player's collision check
-        private List<GameObject> colliders = new List<GameObject>();
+        private readonly List<GameObject> colliders = new List<GameObject>();
 
         // flags
-        bool hasGameStarted, hasPressedSpace, hasPowerUpSpawned;
-        private int nextPowerUp;
+        bool hasGameStarted, hasPressedSpace;
 
         public Game1()
         {
@@ -56,17 +55,15 @@ namespace DTTS
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
             _graphics.PreferredBackBufferHeight = gameHeight; //definição da altura
             _graphics.PreferredBackBufferWidth = gameWidth; //definição da largura
             _graphics.ApplyChanges();
             hasGameStarted = hasPressedSpace = hasGameStarted = false;
             wasFacingRight = true;
-            //if ((highScore = FileUtil.LoadScore()) == null) { }
 
             highScore = FileUtil.LoadScore();
-            if (highScore == null) highScore = new PlayerStats(0);
+            highScore ??= new PlayerStats(0);
+            // ??= operator means it will give a value if highscore is null
 
             base.Initialize();
         }
@@ -83,17 +80,20 @@ namespace DTTS
             scoreFont = Content.Load<SpriteFont>("ScoreFont");
             scoreCircle = Content.Load<Texture2D>("Circle");
 
-            player = new Player(Content.Load<Texture2D>("Bird"), new Vector2(gameWidth / 2 - 35, gameHeight / 2 - 35));
+            player = new Player(Content.Load<Texture2D>("Bird"), new Vector2(gameWidth / 2 - 35, gameHeight / 2 - 35))
+            {
+                powerup = null
+            };
 
             // Powerup Progress Bar
             powerUpProgressBar = new ProgressionBar(new Rectangle(gameWidth / 2 - 50, 75, 100, 6), draw);
 
             // Power Ups
             invincibility = new Invincibility(Content.Load<Texture2D>("star"), new Vector2(gameWidth / 2 + 200, gameHeight / 2), powerUpProgressBar);
-            invincibility.Despawn();
             powerUps.Add(invincibility);
             slowmotion = new SlowMotion(Content.Load<Texture2D>("slowmotion"), new Vector2(gameWidth / 2 + 200, gameHeight / 2), powerUpProgressBar);
             powerUps.Add(slowmotion);
+            slowmotion.Despawn();
 
             #region walls
             wallTop = new Wall(Content.Load<Texture2D>("Square"), new Vector2(0, 0), gameWidth, 50);
@@ -227,30 +227,46 @@ namespace DTTS
             {
                 Random rnd = new Random();
 
-                if (!hasPowerUpSpawned)
+                if (!HasPowerUpOnScreen() && player.powerup == null)
                 {
                     int poweUpNumber = rnd.Next(powerUps.Count);
                     powerUps[poweUpNumber].Spawn(player.isFacingRight);
                 }
 
-                for (int i = 0; i < numOfSpikes; i++)
-                {
-                    spikes[i, (player.isFacingRight ? 0 : 1)].Deactivate();
-                }
+                GenerateSpikes(rnd);
 
-                int spikeNumber = rnd.Next(numOfSpikes);
-
-                for (int j = 0; j < 3; j++)
-                {
-                    //Find a deactive spike to activate
-                    while (spikes[spikeNumber, (player.isFacingRight ? 1 : 0)].isActive)
-                        spikeNumber = rnd.Next(numOfSpikes);
-
-                    spikes[spikeNumber, (player.isFacingRight ? 1 : 0)].Activate();
-                }
                 GameColors.UpdateColor(player.score);
                 
                 wasFacingRight = player.isFacingRight;
+            }
+        }
+
+        protected bool HasPowerUpOnScreen()
+        {
+            foreach (Collectable powerup in powerUps)
+            {
+                if (powerup.isOnScreen) return true;
+            }
+
+            return false;
+        }
+
+        protected void GenerateSpikes(Random rnd)
+        {
+            for (int i = 0; i < numOfSpikes; i++)
+            {
+                spikes[i, (player.isFacingRight ? 0 : 1)].Deactivate();
+            }
+
+            int spikeNumber = rnd.Next(numOfSpikes);
+
+            for (int j = 0; j < 3; j++)
+            {
+                //Find a deactive spike to activate
+                while (spikes[spikeNumber, (player.isFacingRight ? 1 : 0)].isActive)
+                    spikeNumber = rnd.Next(numOfSpikes);
+
+                spikes[spikeNumber, (player.isFacingRight ? 1 : 0)].Activate();
             }
         }
     }

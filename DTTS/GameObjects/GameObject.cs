@@ -23,7 +23,6 @@ namespace DTTS.GameObjects
         Vector2 velocity;
         public Vector2 position;
         public int height = 70, width = 70;
-        public ObjectType objectType;
 
         // Object's Hitbox
         public virtual Rectangle HitBox

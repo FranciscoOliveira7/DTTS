@@ -10,7 +10,7 @@ namespace DTTS.GameObjects.Collectables
 {
     public class Collectable : GameObject
     {
-        public bool isActive;
+        public bool isActive, isOnScreen;
         public float duration;
         public float elapsedTime;
         private ProgressionBar progressBar;
@@ -19,7 +19,6 @@ namespace DTTS.GameObjects.Collectables
         {
             width = 50;
             height = 50;
-            objectType = ObjectType.collectable;
             isActive = false;
             this.progressBar = progressBar;
         }
@@ -40,12 +39,13 @@ namespace DTTS.GameObjects.Collectables
             int posY = rnd.Next(13) * 50 + 100;
 
             position = new Vector2(isRightSided ? 650 - width - 20 : width + 20, posY);
+            isOnScreen = true;
         }
 
         public void Despawn()
         {
             position = new Vector2(-200, -200);
-            isActive = false;
+            isActive = isOnScreen = false;
         }
     }
 }

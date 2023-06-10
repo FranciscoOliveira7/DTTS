@@ -28,7 +28,7 @@ namespace DTTS
             pickup = Content.Load<SoundEffect>("pickup");
 
             invincibilityInstance = invincibility.CreateInstance();
-            invincibilityInstance.Volume = .2f;
+            invincibilityInstance.Volume = .15f;
         }
     }
 }
