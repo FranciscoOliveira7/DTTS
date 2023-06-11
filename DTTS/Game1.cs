@@ -235,7 +235,7 @@ namespace DTTS
             {
                 Random rnd = new Random();
 
-                if (!HasPowerUpOnScreen()/* && player.powerup == null*/)
+                if (!HasPowerUpOnScreen() && player.powerup == null)
                 {
                     int poweUpNumber = rnd.Next(powerUps.Count);
                     powerUps[poweUpNumber].Spawn(player.isFacingRight);
