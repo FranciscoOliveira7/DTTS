@@ -23,7 +23,7 @@ namespace DTTS
         private SpriteFont scoreFont;
         private Texture2D scoreCircle;
 
-        const int gameHeight = 850, gameWidth = 700;
+        public const int screenHeight = 850, screenWidth = 700;
 
         private Player player;
         bool wasFacingRight;
@@ -38,10 +38,13 @@ namespace DTTS
         private readonly List<Collectable> powerUps = new List<Collectable>();
         private Invincibility invincibility;
         private SlowMotion slowmotion;
+        private Thicc thicc;
         ProgressionBar powerUpProgressBar;
 
         // All gameObjects list for the player's collision check
         private readonly List<GameObject> colliders = new List<GameObject>();
+
+        private Camera camera;
 
         // flags
         bool hasGameStarted, hasPressedSpace;
@@ -55,15 +58,16 @@ namespace DTTS
 
         protected override void Initialize()
         {
-            _graphics.PreferredBackBufferHeight = gameHeight; //definição da altura
-            _graphics.PreferredBackBufferWidth = gameWidth; //definição da largura
+            _graphics.PreferredBackBufferHeight = screenHeight; //definição da altura
+            _graphics.PreferredBackBufferWidth = screenWidth; //definição da largura
             _graphics.ApplyChanges();
             hasGameStarted = hasPressedSpace = hasGameStarted = false;
             wasFacingRight = true;
 
-            highScore = FileUtil.LoadScore();
-            highScore ??= new PlayerStats(0);
-            // ??= operator means it will give a value if highscore is null
+            camera = new Camera();
+            highScore = FileUtil.LoadScore() ?? new PlayerStats(0);
+            // ?? operator means if the FileUtil.LoadScore() return null
+            // it will assign the new PlayerStats(0) instead
 
             base.Initialize();
         }
@@ -72,7 +76,7 @@ namespace DTTS
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            draw = new DrawingUtil(GraphicsDevice, _spriteBatch);
+            draw = new DrawingUtil(_spriteBatch);
 
             Sounds.LoadSounds(Content);
 
@@ -80,26 +84,27 @@ namespace DTTS
             scoreFont = Content.Load<SpriteFont>("ScoreFont");
             scoreCircle = Content.Load<Texture2D>("Circle");
 
-            player = new Player(Content.Load<Texture2D>("Bird"), new Vector2(gameWidth / 2 - 35, gameHeight / 2 - 35))
+            player = new Player(Content.Load<Texture2D>("Bird"), new Vector2(screenWidth / 2 - 35, screenHeight / 2 - 35))
             {
                 powerup = null
             };
 
             // Powerup Progress Bar
-            powerUpProgressBar = new ProgressionBar(new Rectangle(gameWidth / 2 - 50, 75, 100, 6), draw);
+            powerUpProgressBar = new ProgressionBar(new Rectangle(screenWidth / 2 - 50, 75, 100, 6), draw);
 
             // Power Ups
-            invincibility = new Invincibility(Content.Load<Texture2D>("star"), new Vector2(gameWidth / 2 + 200, gameHeight / 2), powerUpProgressBar);
+            invincibility = new Invincibility(Content.Load<Texture2D>("star"), new(0,0), powerUpProgressBar);
+            slowmotion = new SlowMotion(Content.Load<Texture2D>("slowmotion"), new(0, 0), powerUpProgressBar);
+            thicc = new Thicc(Content.Load<Texture2D>("skull"), new(0, 0), powerUpProgressBar);
             powerUps.Add(invincibility);
-            slowmotion = new SlowMotion(Content.Load<Texture2D>("slowmotion"), new Vector2(gameWidth / 2 + 200, gameHeight / 2), powerUpProgressBar);
             powerUps.Add(slowmotion);
-            slowmotion.Despawn();
+            powerUps.Add(thicc);
 
             #region walls
-            wallTop = new Wall(Content.Load<Texture2D>("Square"), new Vector2(0, 0), gameWidth, 50);
-            wallBottom = new Wall(Content.Load<Texture2D>("Square"), new Vector2(0, gameHeight - 50), gameWidth, 50);
-            wallLeft = new Wall(Content.Load<Texture2D>("Square"), new Vector2(0, 50), 50, gameHeight - 100);
-            wallRight = new Wall(Content.Load<Texture2D>("Square"), new Vector2(gameWidth - 50, 50), 50, gameHeight);
+            wallTop = new Wall(Content.Load<Texture2D>("Square"), new Vector2(0, 0), screenWidth, 50);
+            wallBottom = new Wall(Content.Load<Texture2D>("Square"), new Vector2(0, screenHeight - 50), screenWidth, 50);
+            wallLeft = new Wall(Content.Load<Texture2D>("Square"), new Vector2(0, 50), 50, screenHeight - 100);
+            wallRight = new Wall(Content.Load<Texture2D>("Square"), new Vector2(screenWidth - 50, 50), 50, screenHeight - 100);
             #endregion
 
             #region spikes
@@ -111,7 +116,7 @@ namespace DTTS
             for (int i = 0; i < numOfSpikes; i++)
             {
                 int posY = (i + 1) * 90 + 30;
-                spikes[i,1] = new Spike(Content.Load<Texture2D>("Spike"), new Vector2(gameWidth - 58, posY), Facing.left);
+                spikes[i,1] = new Spike(Content.Load<Texture2D>("Spike"), new Vector2(screenWidth - 58, posY), Facing.left);
             }
             #endregion
 
@@ -165,20 +170,20 @@ namespace DTTS
         {
             GraphicsDevice.Clear(GameColors.backGround);
 
-            _spriteBatch.Begin();
+            _spriteBatch.Begin(transformMatrix: camera.Transform);
 
             if (player.isDead)
-                _spriteBatch.DrawString(mainFont, "Press space to Restart", new Vector2(106, gameHeight / 2 + 150), Color.White);
+                _spriteBatch.DrawString(mainFont, "Press space to Restart", new Vector2(106, screenHeight / 2 + 150), Color.White);
 
             if (hasGameStarted)
             {
-                _spriteBatch.Draw(scoreCircle, new((int)gameWidth / 2 - 125, (int)gameHeight / 2 - 125, 250, 250), null, Color.White, 0, new Vector2(0,0), SpriteEffects.None, 0f);
-                _spriteBatch.DrawString(scoreFont, player.score.ToString("00"), new Vector2(gameWidth / 2 - 68, gameHeight / 2 - 73), GameColors.backGround);
+                _spriteBatch.Draw(scoreCircle, new((int)screenWidth / 2 - 125, (int)screenHeight / 2 - 125, 250, 250), null, Color.White, 0, new Vector2(0,0), SpriteEffects.None, 0f);
+                _spriteBatch.DrawString(scoreFont, player.score.ToString("00"), new Vector2(screenWidth / 2 - 68, screenHeight / 2 - 73), GameColors.backGround);
             }
             else
             {
                 _spriteBatch.DrawString(mainFont, "High Score: " + highScore.score, new Vector2(205, 100), Color.White);
-                _spriteBatch.DrawString(mainFont, "Press space to Start", new Vector2(135, gameHeight / 2 + 150), Color.White);
+                _spriteBatch.DrawString(mainFont, "Press space to Start", new Vector2(135, screenHeight / 2 + 150), Color.White);
             }
 
             player.Draw(_spriteBatch);
@@ -186,6 +191,11 @@ namespace DTTS
             foreach (var gameObject in colliders)
             {
                 gameObject.Draw(_spriteBatch);
+            }
+
+            if (player.powerup != null && !player.powerup.isActive)
+            {
+                _spriteBatch.DrawString(mainFont, "Press E to use " + player.powerup.ToString(), new Vector2(205, 100), Color.White, 0, new(0,0), .5f, SpriteEffects.None, 0);
             }
 
             _spriteBatch.End();
@@ -196,15 +206,13 @@ namespace DTTS
         protected void MainGame(double deltaTime)
         {
             player.Update(deltaTime, colliders);
+            //camera.Follow(player);
             HandlePlayerScore();
-            if (Keyboard.GetState().IsKeyDown(Keys.F))
-            {
-                powerUps[0].Spawn(player.isFacingRight);
-            }
         }
 
         protected void Restart()
         {
+            camera.Reset();
             if (highScore.score < player.score) highScore.score = player.score;
             hasGameStarted = false;
             wasFacingRight = true;
@@ -227,7 +235,7 @@ namespace DTTS
             {
                 Random rnd = new Random();
 
-                if (!HasPowerUpOnScreen() && player.powerup == null)
+                if (!HasPowerUpOnScreen()/* && player.powerup == null*/)
                 {
                     int poweUpNumber = rnd.Next(powerUps.Count);
                     powerUps[poweUpNumber].Spawn(player.isFacingRight);

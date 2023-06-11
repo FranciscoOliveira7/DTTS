@@ -21,7 +21,6 @@ namespace DTTS.GameObjects
         public bool isFacingRight, isDead, isJumping, isInvincible;
         float angle;
         public int score;
-        Vector2 origin;
         public Collectable powerup;
 
         // Player's hitbox
@@ -37,43 +36,52 @@ namespace DTTS.GameObjects
             timeScale = 1;
             gravity = 25;
             jumpPower = 10;
-            origin = new Vector2(texture.Width / 2, texture.Height / 2);
             isFacingRight = true;
             isDead = isInvincible = false;
             powerup = null;
+            height = 70;
+            width = 70;
         }
 
         //Update method (is executed every tick)
         public void Update(double deltaTime, List<GameObject> gameObjects)
         {
-            Movement();
+            KeyboardState pressedKeys = Keyboard.GetState();
+
+            Movement(pressedKeys);
             Gravity(deltaTime);
             HandlePowerUp(deltaTime);
             HandleCollision(gameObjects);
             Angle(deltaTime);
 
-            position += ((velocity * (float)deltaTime) * 60) * timeScale;
+            if (pressedKeys.IsKeyDown(Keys.E) || powerup != null && powerup.isAutoEquipable)
+            {
+                UsePowerUp();
+            }
+
+            position += velocity * 60 * (float)deltaTime * timeScale;
         }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            //spriteBatch.Draw(texture, HitBox, Color.White);
-
-            // Draw with rotarion
-            spriteBatch.Draw(texture, new ((int)position.X + 35, (int)position.Y + 35, height, width), null, Color.White, angle, origin, (isFacingRight ? SpriteEffects.None : SpriteEffects.FlipHorizontally) , 0f);
+            spriteBatch.Draw(texture, new((int)position.X + width / 2, (int)position.Y + height / 2, height, width), null, Color.White, angle, new Vector2(texture.Width / 2, texture.Height / 2), (isFacingRight ? SpriteEffects.None : SpriteEffects.FlipHorizontally) , 0f);
+            #if DEBUG
+                var drawing = new DrawingUtil(spriteBatch);
+                drawing.DrawRectangleBorder(HitBox, Color.White, 2);
+            #endif
         }
 
-        public void Movement()
+        public void Movement(KeyboardState pressedKeys)
         {
             if (!isDead)
             {
                 // Checks if the Player is jumping
-                if (Keyboard.GetState().IsKeyDown(Keys.Space) && !isJumping)
+                if (pressedKeys.IsKeyDown(Keys.Space) && !isJumping)
                 {
                     Jump();
                 }
                 // Remove jumping state so the Player stops flying while holding jump
-                if (Keyboard.GetState().IsKeyUp(Keys.Space)) isJumping = false;
+                if (pressedKeys.IsKeyUp(Keys.Space)) isJumping = false;
             }
 
             velocity.X = speed;
@@ -169,7 +177,7 @@ namespace DTTS.GameObjects
             isJumping = false;
             score = 0;
             isInvincible = false;
-            if (powerup != null) EndPowerUp();
+            EndPowerUp();
         }
 
         public void Die()
@@ -183,6 +191,7 @@ namespace DTTS.GameObjects
         {
             isFacingRight = !isFacingRight;
             score -= -1;
+            speed += (speed > 0 ? .08f : -.08f);
             Sounds.score.Play(volume: 0.1f, pitch: 0.0f, pan: 0.0f);
         }
 
@@ -198,11 +207,18 @@ namespace DTTS.GameObjects
                     break;
 
                 case SlowMotion:
-                    timeScale = 1;
+                    timeScale = 1; break;
+
+                case Thicc:
+                    width = height = 70;
+                    position.Y += 15;
+                    if (velocity.X > 1)
+                    {
+                        position.X += 30;
+                    }
                     break;
 
-                default:
-                    break;
+                default: break;
             }
 
             powerup.elapsedTime = 0;
@@ -212,7 +228,7 @@ namespace DTTS.GameObjects
 
         public void HandlePowerUp(double deltaTime)
         {
-            if (powerup != null)
+            if (powerup != null && powerup.isActive)
             {
                 if (powerup.elapsedTime >= powerup.duration)
                 {
@@ -224,21 +240,30 @@ namespace DTTS.GameObjects
 
         public void UsePowerUp()
         {
+            if (powerup == null || isDead || powerup.isActive) return;
             switch (powerup)
             {
                 case Invincibility:
                     Sounds.invincibilityInstance.Play();
-                    powerup.isActive = isInvincible = true;
+                    isInvincible = true;
                     break;
 
                 case SlowMotion:
-                    timeScale = 0.7f;
-                    powerup.isActive = true;
+                    timeScale = 0.7f; break;
+
+                case Thicc:
+                    height = width = 100;
+                    position.Y -= 15;
+                    if (velocity.X > 1)
+                    {
+                        position.X -= 30;
+                    }
                     break;
 
                 default:
                     break;
             }
+            powerup.isActive = true;
         }
 
         private void Collect(Collectable powerup)
@@ -247,7 +272,6 @@ namespace DTTS.GameObjects
             this.powerup = powerup;
             powerup.Despawn();
             Sounds.pickup.Play(volume: .8f, pitch: 0.0f, pan: 0.0f);
-            UsePowerUp();
         }
     }
 }

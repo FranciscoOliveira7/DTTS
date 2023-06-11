@@ -14,7 +14,6 @@ namespace DTTS
         Vector2 position;
         int thiccness, width;
         Color backGround;
-        Color foreGround;
 
         public ProgressionBar(Rectangle rectangle, DrawingUtil drawUtil)
         {
@@ -23,17 +22,15 @@ namespace DTTS
             position = new Vector2(rectangle.X, rectangle.Y);
             draw = drawUtil;
             backGround = Color.White;
-            foreGround = Color.Gray;
         }
 
-        public ProgressionBar(Rectangle rectangle, Color background, Color foreground, DrawingUtil drawUtil)
+        public ProgressionBar(Rectangle rectangle, Color background, DrawingUtil drawUtil)
         {
             thiccness = rectangle.Height;
             width = rectangle.Width;
             position = new Vector2(rectangle.X, rectangle.Y);
-            this.draw = drawUtil;
-            this.backGround = background;
-            this.foreGround = foreground;
+            draw = drawUtil;
+            backGround = background;
         }
 
         /// <summary>
@@ -43,7 +40,7 @@ namespace DTTS
         public void Draw(float progress)
         {
             draw.DrawRectangle(new Rectangle((int)position.X, (int)position.Y, width, thiccness), backGround);
-            draw.DrawRectangle(new Rectangle((int)position.X, (int)position.Y, (int)(width - width * progress), thiccness), foreGround);
+            draw.DrawRectangle(new Rectangle((int)position.X, (int)position.Y, (int)(width - width * progress), thiccness), GameColors.foreGround);
         }
     }
 }

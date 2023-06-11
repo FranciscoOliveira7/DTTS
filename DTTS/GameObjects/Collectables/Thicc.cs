@@ -8,18 +8,18 @@ using System.Threading.Tasks;
 
 namespace DTTS.GameObjects.Collectables
 {
-    public class Invincibility : Collectable
+    public class Thicc : Collectable
     {
-        public Invincibility(Texture2D texture, Vector2 position, ProgressionBar progressBar) : base(texture, position, progressBar)
+        public Thicc(Texture2D texture, Vector2 position, ProgressionBar progressBar) : base(texture, position, progressBar)
         {
             duration = 5;
-            isAutoEquipable = false;
+            isAutoEquipable = true;
             // ¯\_(ツ)_/¯
         }
 
         public override string ToString()
         {
-            return "Invincibility";
+            return "Thiccness";
         }
     }
 }

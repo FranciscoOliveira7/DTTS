@@ -10,15 +10,13 @@ namespace DTTS
 {
     public class DrawingUtil
     {
-        private Texture2D pixel;
-        private readonly GraphicsDevice graphicsDevice;
-        private SpriteBatch spriteBatch;
+        private readonly Texture2D pixel;
+        private readonly SpriteBatch spriteBatch;
 
-        public DrawingUtil(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
+        public DrawingUtil(SpriteBatch spriteBatch)
         {
-            pixel = new Texture2D(graphicsDevice, 1, 1);
+            pixel = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
             pixel.SetData(new[] { Color.White });
-            this.graphicsDevice = graphicsDevice;
             this.spriteBatch = spriteBatch;
         }
 
@@ -80,6 +78,15 @@ namespace DTTS
         public void DrawRectangle(Rectangle rectangle, Color color)
         {
             spriteBatch.Draw(pixel, rectangle, color);
+        }
+
+
+        public void DrawRectangleBorder(Rectangle rectangle, Color color, int lineWidth)
+        {
+            spriteBatch.Draw(pixel, new Rectangle(rectangle.X, rectangle.Y, lineWidth, rectangle.Height + lineWidth), color);
+            spriteBatch.Draw(pixel, new Rectangle(rectangle.X, rectangle.Y, rectangle.Width + lineWidth, lineWidth), color);
+            spriteBatch.Draw(pixel, new Rectangle(rectangle.X + rectangle.Width, rectangle.Y, lineWidth, rectangle.Height + lineWidth), color);
+            spriteBatch.Draw(pixel, new Rectangle(rectangle.X, rectangle.Y + rectangle.Height, rectangle.Width + lineWidth, lineWidth), color);
         }
     }
 }

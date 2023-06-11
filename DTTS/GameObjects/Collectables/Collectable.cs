@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -8,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace DTTS.GameObjects.Collectables
 {
-    public class Collectable : GameObject
+    public abstract class Collectable : GameObject
     {
-        public bool isActive, isOnScreen;
+        public bool isActive, isOnScreen, isAutoEquipable;
         public float duration;
         public float elapsedTime;
         private ProgressionBar progressBar;
@@ -21,6 +22,7 @@ namespace DTTS.GameObjects.Collectables
             height = 50;
             isActive = false;
             this.progressBar = progressBar;
+            Despawn();
         }
 
         public override void Draw(SpriteBatch spriteBatch)

@@ -20,9 +20,9 @@ namespace DTTS.GameObjects
     {
         public Texture2D texture; //Object Texture
 
-        Vector2 velocity;
+        private Vector2 velocity;
         public Vector2 position;
-        public int height = 70, width = 70;
+        public int height, width;
 
         // Object's Hitbox
         public virtual Rectangle HitBox
