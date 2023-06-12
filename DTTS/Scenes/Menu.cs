@@ -48,7 +48,7 @@ namespace DTTS.Scenes
                 Position = new Vector2(DTTSGame.screenWidth / 2 - 150, DTTSGame.screenHeight - 220),
                 Text = "Single Spike",
             };
-            level2GameBtn.Click += LoadLevel1Btn_Click;
+            level2GameBtn.Click += LoadLevel2Btn_Click;
             buttons.Add(level2GameBtn);
 
             #region walls

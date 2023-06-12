@@ -97,6 +97,7 @@ namespace DTTS.Scenes
             {
                 _spriteBatch.DrawString(game.mainFont, "High Score: " + game.highScore.highscore, new Vector2(205, 100), Color.White);
                 _spriteBatch.DrawString(game.mainFont, "Press space to Start", new Vector2(135, screenHeight / 2 + 150), Color.White);
+                _spriteBatch.DrawString(game.mainFont, "Press esc to go back", new Vector2(250, screenHeight / 2 + 200), Color.White, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
             }
 
             game.player.Draw(_spriteBatch);
@@ -158,9 +159,6 @@ namespace DTTS.Scenes
             if (game.highScore.highscore < game.player.score) game.highScore.highscore = game.player.score;
             hasGameStarted = false;
             game.player.Restart();
-            for (int i = 0; i < numOfSpikes; i++)
-                for (int j = 0; j < 2; j++)
-                    spikes[i, j].Deactivate();
 
             foreach (var powerup in powerUps)
                 powerup.Despawn();
