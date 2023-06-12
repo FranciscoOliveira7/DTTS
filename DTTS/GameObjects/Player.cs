@@ -15,7 +15,6 @@ namespace DTTS.GameObjects
 {
     public class Player : GameObject
     {
-        Vector2 velocity;
         private float speed;
         public float timeScale;
         private readonly float jumpPower, gravity;

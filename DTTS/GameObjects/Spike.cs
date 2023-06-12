@@ -42,6 +42,12 @@ namespace DTTS.GameObjects
             spriteBatch.Draw(texture, new((int)position.X + 35, (int)position.Y + 35, height, width), null, GameColors.foreGround, 0, origin, (SpriteEffects)facing, 0f);
         }
 
+        //Update method (is executed every tick)
+        public void Update(double deltaTime, float velocity)
+        {
+            position.Y += velocity * 60 * (float)deltaTime;
+        }
+
         public void Activate()
         {
             position.X = activePosition;

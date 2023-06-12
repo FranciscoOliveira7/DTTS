@@ -29,8 +29,10 @@ namespace DTTS.Scenes
 
         private Camera camera;
 
+        float spikeSpeed;
+
         // flags
-        bool hasGameStarted, hasPressedSpace;
+        bool hasGameStarted, hasPressedSpace, isSpikeGoingUp1, isSpikeGoingUp2;
 
         public override void LoadContent()
         {
@@ -64,6 +66,8 @@ namespace DTTS.Scenes
             spikes[0, 0] = new Spike(DTTSGame.instance.spikeTexture, new Vector2(-12, 120), Facing.right);
             spikes[0, 1] = new Spike(DTTSGame.instance.spikeTexture, new Vector2(screenWidth - 58, 120), Facing.left);
 
+            RePlaceSpikes();
+
             #endregion
 
             #region adding to colliders list
@@ -79,6 +83,10 @@ namespace DTTS.Scenes
             spikes[0, 0].Activate();
             spikes[0, 1].Activate();
             #endregion
+
+            isSpikeGoingUp1 = false;
+            isSpikeGoingUp2 = false;
+            spikeSpeed = 5;
         }
 
         public override void Draw(GameTime gameTime)
@@ -150,6 +158,7 @@ namespace DTTS.Scenes
         protected void MainGame(double deltaTime)
         {
             game.player.Update(deltaTime, colliders);
+            MoveSpike(deltaTime);
             //camera.Follow(player);
         }
 
@@ -177,6 +186,8 @@ namespace DTTS.Scenes
                 powerUps[poweUpNumber].Spawn(game.player.isFacingRight);
             }
 
+            spikeSpeed += 0.3f;
+
             GameColors.UpdateColor(game.player.score);
         }
 
@@ -188,6 +199,37 @@ namespace DTTS.Scenes
             }
 
             return false;
+        }
+
+        public void MoveSpike(double deltaTime)
+        {
+            if (spikes[0, 0].position.Y > DTTSGame.screenHeight - 130)
+            {
+                isSpikeGoingUp1 = true;
+            }
+            if (spikes[0, 1].position.Y > DTTSGame.screenHeight - 130)
+            {
+                isSpikeGoingUp2 = true;
+            }
+            if (spikes[0, 0].position.Y < 50)
+            {
+                isSpikeGoingUp1 = false;
+            }
+            if (spikes[0, 1].position.Y < 50)
+            {
+                isSpikeGoingUp2 = false;
+            }
+
+            spikes[0, 0].Update(deltaTime, isSpikeGoingUp1 ? -spikeSpeed : spikeSpeed);
+            spikes[0, 1].Update(deltaTime, isSpikeGoingUp2 ? -spikeSpeed : spikeSpeed);
+        }
+
+        public void RePlaceSpikes()
+        {
+            Random rnd = new Random();
+
+            spikes[0, 0] = new Spike(DTTSGame.instance.spikeTexture, new Vector2(-12, (rnd.Next(1, 8) + 1) * 90 + 30), Facing.right);
+            spikes[0, 1] = new Spike(DTTSGame.instance.spikeTexture, new Vector2(screenWidth - 58, (rnd.Next(1, 8) + 1) * 90 + 30), Facing.left);
         }
     }
 }

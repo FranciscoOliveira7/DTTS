@@ -15,7 +15,7 @@ namespace DTTS.GameObjects
     {
         public Texture2D texture; //Object Texture
 
-        private Vector2 velocity;
+        public Vector2 velocity;
         public Vector2 position;
         public int height, width;
 
