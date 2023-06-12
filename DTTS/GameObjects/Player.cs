@@ -156,8 +156,6 @@ namespace DTTS.GameObjects
 
         public void Gravity(double deltaTime) => velocity.Y += (float)(gravity * deltaTime) * timeScale;
 
-        public bool HasTurned(bool wasFacingRight) => wasFacingRight != isFacingRight;
-
         private void Jump()
         {
             velocity.Y = 0;
@@ -193,6 +191,8 @@ namespace DTTS.GameObjects
             score -= -1;
             speed += (speed > 0 ? .08f : -.08f);
             Sounds.score.Play(volume: 0.1f, pitch: 0.0f, pan: 0.0f);
+
+            DTTSGame.instance.HandlePlayerScore();
         }
 
         public void EndPowerUp()
@@ -248,16 +248,13 @@ namespace DTTS.GameObjects
                     isInvincible = true;
                     break;
 
-                case SlowMotion:
-                    timeScale = 0.7f; break;
+                case SlowMotion: timeScale = 0.7f; break;
 
                 case Thicc:
                     height = width = 100;
                     position.Y -= 15;
-                    if (velocity.X > 1)
-                    {
-                        position.X -= 30;
-                    }
+                    // snap to right
+                    if (velocity.X > 1) position.X -= 30;
                     break;
 
                 default:

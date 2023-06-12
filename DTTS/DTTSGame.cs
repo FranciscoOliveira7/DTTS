@@ -12,10 +12,12 @@ using System.Reflection.Metadata;
 
 namespace DTTS
 {
-    public class Game1 : Game
+    public class DTTSGame : Game
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+
+        public static DTTSGame instance;
 
         DrawingUtil draw; // Simple drawing utiliy
 
@@ -26,7 +28,6 @@ namespace DTTS
         public const int screenHeight = 850, screenWidth = 700;
 
         private Player player;
-        bool wasFacingRight;
 
         PlayerStats highScore = new PlayerStats();
 
@@ -49,8 +50,11 @@ namespace DTTS
         // flags
         bool hasGameStarted, hasPressedSpace;
 
-        public Game1()
+        public DTTSGame()
         {
+            // First time testing Singleton concept
+            instance = this;
+
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
@@ -62,7 +66,6 @@ namespace DTTS
             _graphics.PreferredBackBufferWidth = screenWidth; //definição da largura
             _graphics.ApplyChanges();
             hasGameStarted = hasPressedSpace = hasGameStarted = false;
-            wasFacingRight = true;
 
             camera = new Camera();
             highScore = FileUtil.LoadScore() ?? new PlayerStats(0);
@@ -207,7 +210,6 @@ namespace DTTS
         {
             player.Update(deltaTime, colliders);
             //camera.Follow(player);
-            HandlePlayerScore();
         }
 
         protected void Restart()
@@ -215,7 +217,6 @@ namespace DTTS
             camera.Reset();
             if (highScore.score < player.score) highScore.score = player.score;
             hasGameStarted = false;
-            wasFacingRight = true;
             player.Restart();
             for (int i = 0; i < numOfSpikes; i++)
                 for (int j = 0; j < 2; j++)
@@ -228,25 +229,19 @@ namespace DTTS
             GameColors.backGround = Color.LightGray;
         }
 
-        protected void HandlePlayerScore()
+        public void HandlePlayerScore()
         {
-            //If the player has turned, activate 3 random spikes on the other side
-            if (player.HasTurned(wasFacingRight))
+            Random rnd = new Random();
+
+            if (!HasPowerUpOnScreen() && player.powerup == null)
             {
-                Random rnd = new Random();
-
-                if (!HasPowerUpOnScreen() && player.powerup == null)
-                {
-                    int poweUpNumber = rnd.Next(powerUps.Count);
-                    powerUps[poweUpNumber].Spawn(player.isFacingRight);
-                }
-
-                GenerateSpikes(rnd);
-
-                GameColors.UpdateColor(player.score);
-                
-                wasFacingRight = player.isFacingRight;
+                int poweUpNumber = rnd.Next(powerUps.Count);
+                powerUps[poweUpNumber].Spawn(player.isFacingRight);
             }
+
+            GenerateSpikes(rnd);
+
+            GameColors.UpdateColor(player.score);
         }
 
         protected bool HasPowerUpOnScreen()

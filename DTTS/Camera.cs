@@ -21,7 +21,7 @@ namespace DTTS
         {
             var position = Matrix.CreateTranslation(0, -target.position.Y - (target.HitBox.Height / 2), 0);
 
-            var offset = Matrix.CreateTranslation(0, Game1.screenHeight / 2, 0);
+            var offset = Matrix.CreateTranslation(0, DTTSGame.screenHeight / 2, 0);
 
             Transform = position * offset;
         }

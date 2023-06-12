@@ -1,4 +1,4 @@
 ﻿
-using var game = new DTTS.Game1();
+using var game = new DTTS.DTTSGame();
 game.IsFixedTimeStep = false;
 game.Run();
