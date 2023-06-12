@@ -41,8 +41,6 @@ namespace DTTS
         public Scene level1;
         public Scene level2;
 
-        private bool hasGameStarted;
-
         public DTTSGame()
         {
             // First time testing Singleton concept
@@ -59,8 +57,6 @@ namespace DTTS
             _graphics.PreferredBackBufferWidth = screenWidth; //definição da largura
             _graphics.ApplyChanges();
 
-            hasGameStarted = false;
-
             highScore = FileUtil.LoadScore() ?? new PlayerStats(0);
             // ?? operator means if the FileUtil.LoadScore() return null
             // it will assign the new PlayerStats(0) instead
@@ -70,14 +66,14 @@ namespace DTTS
             menu = new Menu();
             level1 = new Level1();
             level2 = new Level2();
-            currentScene = level2;
+            currentScene = menu;
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            player = new Player(Content.Load<Texture2D>("Bird"), new Vector2(screenWidth / 2 - 35, screenHeight / 2 - 35));
+            player = new Player(Content.Load<Texture2D>("Bird"), new(screenWidth / 2 - 35, screenHeight / 2 - 35));
 
             draw = new DrawingUtil(_spriteBatch);
             Sounds.LoadSounds(Content);
@@ -99,20 +95,14 @@ namespace DTTS
         {
             currentScene.Update(gameTime);
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Space) && !hasGameStarted)
-            {
-                ChangeScene(level1);
-                hasGameStarted = true;
-            }
-
             base.Update(gameTime);
         }
 
         public void ChangeScene(Scene newScene)
         {
             if (currentScene is Level1) ((Level1)currentScene).Restart();
+            if (currentScene is Level2) ((Level2)currentScene).Restart();
             currentScene = newScene;
-            hasGameStarted = false;
         }
 
         protected override void Draw(GameTime gameTime)

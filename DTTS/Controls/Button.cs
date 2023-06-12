@@ -37,9 +37,13 @@ namespace DTTS.Controls
 
         public Vector2 Position { get; set; }
 
+        public const int height = 55;
+
+        public int width { get; set; }
+
         public Rectangle Rectangle
         {
-            get => new Rectangle((int)Position.X, (int)Position.Y, _texture.Width, _texture.Height);
+            get => new Rectangle((int)Position.X, (int)Position.Y, width, height);
         }
 
         public string Text { get; set; }
@@ -52,12 +56,12 @@ namespace DTTS.Controls
         {
             _texture = texture;
             _font = font;
-            PenColour = Color.Black;
+            PenColour = Color.White;
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            var colour = Color.White;
+            var colour = new Color(166, 166, 166);
 
             if (_isHovering)
             colour = Color.Gray;
@@ -69,7 +73,7 @@ namespace DTTS.Controls
                 var x = (Rectangle.X + (Rectangle.Width / 2)) - (_font.MeasureString(Text).X / 2);
                 var y = (Rectangle.Y + (Rectangle.Height / 2)) - (_font.MeasureString(Text).Y / 2);
 
-                spriteBatch.DrawString(_font, Text, new Vector2(x, y), PenColour);
+                spriteBatch.DrawString(_font, Text, new Vector2(x, y), PenColour, 0, Vector2.Zero, 1, 0, 0);
             }
         }
 
