@@ -33,24 +33,24 @@ Don't Touch the Spikes Remake trata-se de um remake de um pequeno jogo popular d
 
 ## 📁 Organização das Pastas e Ficheiros
 
-📂DTTS<br>
- └📂GameObjects<br>
-      └📂Collectables<br>
-           └💾Collectable.cs<br>
-           └💾Invincibility.cs<br>
-           └💾SlowMotion.cs<br>
-           └💾Thicc.cs<br>
-      └💾GameObject.cs<br>
-      └💾Component.cs<br>
-      └💾Player.cs<br>
-      └💾Spike.cs<br>
-      └💾Wall.cs<br>
- └📂Scenes<br>
-      └💾Scene.cs<br>
-      └💾Level1.cs<br>
- └📁Content<br>
- └📁Controls<br>
-      └💾Button.cs<br>
+📂DTTS
+ └📂GameObjects
+      └📂Collectables
+           └💾Collectable.cs
+           └💾Invincibility.cs
+           └💾SlowMotion.cs
+           └💾Thicc.cs
+      └💾GameObject.cs
+      └💾Component.cs
+      └💾Player.cs
+      └💾Spike.cs
+      └💾Wall.cs
+ └📂Scenes
+      └💾Scene.cs
+      └💾Level1.cs
+ └📁Content
+ └📁Controls
+      └💾Button.cs
 
 ### . git
 
