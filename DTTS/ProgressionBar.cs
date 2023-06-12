@@ -10,10 +10,10 @@ namespace DTTS
 {
     public class ProgressionBar
     {
-        DrawingUtil draw;
-        Vector2 position;
-        int thiccness, width;
-        Color backGround;
+        private readonly DrawingUtil draw;
+        private readonly Vector2 position;
+        private readonly int thiccness, width;
+        private readonly Color backGround;
 
         public ProgressionBar(Rectangle rectangle, DrawingUtil drawUtil)
         {

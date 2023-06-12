@@ -17,6 +17,20 @@ namespace DTTS.GameObjects.Collectables
             // ¯\_(ツ)_/¯
         }
 
+        public override void Use(Player player)
+        {
+            base.Use(player);
+            Sounds.invincibilityInstance.Play();
+            player.isInvincible = true;
+        }
+
+        public override void End(Player player)
+        {
+            Sounds.invincibilityInstance.Stop();
+            player.isInvincible = false;
+            base.End(player);
+        }
+
         public override string ToString()
         {
             return "Invincibility";

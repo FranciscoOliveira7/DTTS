@@ -17,6 +17,18 @@ namespace DTTS.GameObjects.Collectables
             // ¯\_(ツ)_/¯
         }
 
+        public override void Use(Player player)
+        {
+            base.Use(player);
+            player.timeScale = 0.7f;
+        }
+
+        public override void End(Player player)
+        {
+            player.timeScale = 1;
+            base.End(player);
+        }
+
         public override string ToString()
         {
             return "Slow Motion";

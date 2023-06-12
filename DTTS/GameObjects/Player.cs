@@ -16,10 +16,11 @@ namespace DTTS.GameObjects
     public class Player : GameObject
     {
         Vector2 velocity;
-        private float speed, timeScale;
+        private float speed;
+        public float timeScale;
         private readonly float jumpPower, gravity;
         public bool isFacingRight, isDead, isJumping, isInvincible;
-        float angle;
+        private float angle;
         public int score;
         public Collectable powerup;
 
@@ -46,18 +47,13 @@ namespace DTTS.GameObjects
         //Update method (is executed every tick)
         public void Update(double deltaTime, List<GameObject> gameObjects)
         {
-            KeyboardState pressedKeys = Keyboard.GetState();
+            KeyboardState keyboardState = Keyboard.GetState();
 
-            Movement(pressedKeys);
+            Movement(keyboardState);
             Gravity(deltaTime);
-            HandlePowerUp(deltaTime);
+            HandlePowerUp(deltaTime, keyboardState);
             HandleCollision(gameObjects);
             Angle(deltaTime);
-
-            if (pressedKeys.IsKeyDown(Keys.E) || powerup != null && powerup.isAutoEquipable)
-            {
-                UsePowerUp();
-            }
 
             position += velocity * 60 * (float)deltaTime * timeScale;
         }
@@ -71,17 +67,17 @@ namespace DTTS.GameObjects
             #endif
         }
 
-        public void Movement(KeyboardState pressedKeys)
+        public void Movement(KeyboardState keyboardState)
         {
             if (!isDead)
             {
                 // Checks if the Player is jumping
-                if (pressedKeys.IsKeyDown(Keys.Space) && !isJumping)
+                if (keyboardState.IsKeyDown(Keys.Space) && !isJumping)
                 {
                     Jump();
                 }
                 // Remove jumping state so the Player stops flying while holding jump
-                if (pressedKeys.IsKeyUp(Keys.Space)) isJumping = false;
+                if (keyboardState.IsKeyUp(Keys.Space)) isJumping = false;
             }
 
             velocity.X = speed;
@@ -197,38 +193,15 @@ namespace DTTS.GameObjects
 
         public void EndPowerUp()
         {
-            if (powerup == null) return;
-
-            switch (powerup)
-            {
-                case Invincibility:
-                    Sounds.invincibilityInstance.Stop();
-                    isInvincible = false;
-                    break;
-
-                case SlowMotion:
-                    timeScale = 1; break;
-
-                case Thicc:
-                    width = height = 70;
-                    position.Y += 15;
-                    if (velocity.X > 1)
-                    {
-                        position.X += 30;
-                    }
-                    break;
-
-                default: break;
-            }
-
-            powerup.elapsedTime = 0;
-            powerup.isActive = false;
+            powerup?.End(this);
             powerup = null;
         }
 
-        public void HandlePowerUp(double deltaTime)
+        public void HandlePowerUp(double deltaTime, KeyboardState keyboardState)
         {
-            if (powerup != null && powerup.isActive)
+            if (powerup == null) return;
+
+            if (powerup.isActive)
             {
                 if (powerup.elapsedTime >= powerup.duration)
                 {
@@ -236,31 +209,7 @@ namespace DTTS.GameObjects
                 }
                 else powerup.elapsedTime += (float)deltaTime;
             }
-        }
-
-        public void UsePowerUp()
-        {
-            if (powerup == null || isDead || powerup.isActive) return;
-            switch (powerup)
-            {
-                case Invincibility:
-                    Sounds.invincibilityInstance.Play();
-                    isInvincible = true;
-                    break;
-
-                case SlowMotion: timeScale = 0.7f; break;
-
-                case Thicc:
-                    height = width = 100;
-                    position.Y -= 15;
-                    // snap to right
-                    if (velocity.X > 1) position.X -= 30;
-                    break;
-
-                default:
-                    break;
-            }
-            powerup.isActive = true;
+            else if(keyboardState.IsKeyDown(Keys.E) || powerup.isAutoEquipable) powerup.Use(this);
         }
 
         private void Collect(Collectable powerup)

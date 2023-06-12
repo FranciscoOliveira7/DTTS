@@ -14,7 +14,7 @@ namespace DTTS.GameObjects.Collectables
         public bool isActive, isOnScreen, isAutoEquipable;
         public float duration;
         public float elapsedTime;
-        private ProgressionBar progressBar;
+        private readonly ProgressionBar progressBar;
 
         public Collectable(Texture2D texture, Vector2 position, ProgressionBar progressBar) : base(texture, position)
         {
@@ -28,10 +28,8 @@ namespace DTTS.GameObjects.Collectables
         public override void Draw(SpriteBatch spriteBatch)
         {
             base.Draw(spriteBatch);
-            if (isActive)
-            {
-                progressBar.Draw(elapsedTime / duration);
-            }
+
+            if (isActive) progressBar.Draw(elapsedTime / duration);
         }
 
         public void Spawn(bool isRightSided)
@@ -47,7 +45,20 @@ namespace DTTS.GameObjects.Collectables
         public void Despawn()
         {
             position = new Vector2(-200, -200);
-            isActive = isOnScreen = false;
+            isActive = false;
+            isOnScreen = false;
+        }
+
+        public virtual void Use(Player player)
+        {
+            if (player.isDead || player.powerup.isActive) return;
+            isActive = true;
+        }
+
+        public virtual void End(Player player)
+        {
+            elapsedTime = 0;
+            isActive = false;
         }
     }
 }

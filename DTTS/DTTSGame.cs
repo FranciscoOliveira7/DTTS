@@ -160,13 +160,13 @@ namespace DTTS
                     hasPressedSpace = true;
                 }
                 if (Keyboard.GetState().IsKeyUp(Keys.Space)) hasPressedSpace = false;
-
-                base.Update(gameTime);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.R))
             {
                 Restart();
             }
+
+            base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)

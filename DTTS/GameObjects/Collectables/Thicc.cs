@@ -17,6 +17,28 @@ namespace DTTS.GameObjects.Collectables
             // ¯\_(ツ)_/¯
         }
 
+        public override void Use(Player player)
+        {
+            base.Use(player);
+            player.height = 100;
+            player.width = 100;
+            player.position.Y -= 15;
+            // snap to right
+            if (player.isFacingRight) player.position.X -= 30;
+        }
+
+        public override void End(Player player)
+        {
+            player.width = 70;
+            player.height = 70;
+            player.position.Y += 15;
+            if (player.isFacingRight)
+            {
+                player.position.X += 30;
+            }
+            base.End(player);
+        }
+
         public override string ToString()
         {
             return "Thiccness";
