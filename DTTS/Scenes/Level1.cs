@@ -149,18 +149,17 @@ namespace DTTS.Scenes
                 //game.Exit();
                 DTTSGame.instance.ChangeScene(DTTSGame.instance.menu);
             }
-            else
-            {
-                if (hasGameStarted) MainGame(deltaTime);
 
-                if (Keyboard.GetState().IsKeyDown(Keys.Space) && !hasPressedSpace)
-                {
-                    if (game.player.isDead) Restart();
-                    else hasGameStarted = true;
-                    hasPressedSpace = true;
-                }
-                if (Keyboard.GetState().IsKeyUp(Keys.Space)) hasPressedSpace = false;
+            if (hasGameStarted) MainGame(deltaTime);
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Space) && !hasPressedSpace)
+            {
+                if (game.player.isDead) Restart();
+                else hasGameStarted = true;
+                hasPressedSpace = true;
             }
+            if (Keyboard.GetState().IsKeyUp(Keys.Space)) hasPressedSpace = false;
+
             if (Keyboard.GetState().IsKeyDown(Keys.R))
             {
                 Restart();
