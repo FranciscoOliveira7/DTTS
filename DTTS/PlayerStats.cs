@@ -9,16 +9,16 @@ namespace DTTS
     [Serializable]
     public class PlayerStats
     {
-        public int score;
+        public int highscore;
 
         public PlayerStats()
         {
-            this.score = 0;
+            this.highscore = 0;
         }
 
         public PlayerStats(int score)
         {
-            this.score = score;
+            this.highscore = score;
         }
     }
 }

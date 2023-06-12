@@ -185,7 +185,7 @@ namespace DTTS
             }
             else
             {
-                _spriteBatch.DrawString(mainFont, "High Score: " + highScore.score, new Vector2(205, 100), Color.White);
+                _spriteBatch.DrawString(mainFont, "High Score: " + highScore.highscore, new Vector2(205, 100), Color.White);
                 _spriteBatch.DrawString(mainFont, "Press space to Start", new Vector2(135, screenHeight / 2 + 150), Color.White);
             }
 
@@ -215,7 +215,7 @@ namespace DTTS
         protected void Restart()
         {
             camera.Reset();
-            if (highScore.score < player.score) highScore.score = player.score;
+            if (highScore.highscore < player.score) highScore.highscore = player.score;
             hasGameStarted = false;
             player.Restart();
             for (int i = 0; i < numOfSpikes; i++)
