@@ -175,6 +175,7 @@ namespace DTTS.Scenes
             GameColors.foreGround = Color.Gray;
             GameColors.backGround = Color.LightGray;
             RePlaceSpikes();
+            spikeSpeed = 5;
         }
 
         public override void HandlePlayerScore()
