@@ -43,9 +43,9 @@ namespace DTTS.GameObjects
         }
 
         //Update method (is executed every tick)
-        public void Update(double deltaTime, float velocity)
+        public void Update(double deltaTime, float velocity, float timeScale)
         {
-            position.Y += velocity * 60 * (float)deltaTime;
+            position.Y += velocity * 60 * (float)deltaTime * timeScale;
         }
 
         public void Activate()

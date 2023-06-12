@@ -174,6 +174,7 @@ namespace DTTS.Scenes
 
             GameColors.foreGround = Color.Gray;
             GameColors.backGround = Color.LightGray;
+            RePlaceSpikes();
         }
 
         public override void HandlePlayerScore()
@@ -220,16 +221,16 @@ namespace DTTS.Scenes
                 isSpikeGoingUp2 = false;
             }
 
-            spikes[0, 0].Update(deltaTime, isSpikeGoingUp1 ? -spikeSpeed : spikeSpeed);
-            spikes[0, 1].Update(deltaTime, isSpikeGoingUp2 ? -spikeSpeed : spikeSpeed);
+            spikes[0, 0].Update(deltaTime, isSpikeGoingUp1 ? -spikeSpeed : spikeSpeed, DTTSGame.instance.player.timeScale);
+            spikes[0, 1].Update(deltaTime, isSpikeGoingUp2 ? -spikeSpeed : spikeSpeed, DTTSGame.instance.player.timeScale);
         }
 
         public void RePlaceSpikes()
         {
             Random rnd = new Random();
 
-            spikes[0, 0] = new Spike(DTTSGame.instance.spikeTexture, new Vector2(-12, (rnd.Next(1, 8) + 1) * 90 + 30), Facing.right);
-            spikes[0, 1] = new Spike(DTTSGame.instance.spikeTexture, new Vector2(screenWidth - 58, (rnd.Next(1, 8) + 1) * 90 + 30), Facing.left);
+            spikes[0, 0].position = new (-12, rnd.Next(1, 8) * 90 + 30);
+            spikes[0, 1].position = new (screenWidth - 58, rnd.Next(1, 8) * 90 + 30);
         }
     }
 }
