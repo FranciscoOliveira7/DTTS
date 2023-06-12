@@ -25,10 +25,7 @@ namespace DTTS.GameObjects
         public Collectable powerup;
 
         // Player's hitbox
-        public override Rectangle HitBox
-        {
-            get => new Rectangle((int)position.X, (int)position.Y + 8, width, height - 16);
-        }
+        public override Rectangle HitBox => new ((int)position.X, (int)position.Y + 8, width, height - 16);
 
         //Contructor
         public Player(Texture2D texture, Vector2 position) : base(texture, position)

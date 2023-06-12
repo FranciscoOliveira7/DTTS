@@ -26,6 +26,10 @@ namespace DTTS
         public SpriteFont scoreFont;
         public Texture2D scoreCircle;
 
+        // Textures
+        public Texture2D spikeTexture;
+        public Texture2D squareTexture;
+
         public const int screenHeight = 850, screenWidth = 700;
 
         public Player player;
@@ -35,6 +39,7 @@ namespace DTTS
         private Scene currentScene;
         public Scene menu;
         public Scene level1;
+        public Scene level2;
 
         private bool hasGameStarted;
 
@@ -64,15 +69,21 @@ namespace DTTS
 
             menu = new Menu();
             level1 = new Level1();
-            currentScene = menu;
+            level2 = new Level2();
+            currentScene = level2;
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
+            player = new Player(Content.Load<Texture2D>("Bird"), new Vector2(screenWidth / 2 - 35, screenHeight / 2 - 35));
+
             draw = new DrawingUtil(_spriteBatch);
             Sounds.LoadSounds(Content);
+
+            spikeTexture = Content.Load<Texture2D>("Spike");
+            squareTexture = Content.Load<Texture2D>("Square");
 
             mainFont = Content.Load<SpriteFont>("MainFont");
             scoreFont = Content.Load<SpriteFont>("ScoreFont");
@@ -80,6 +91,7 @@ namespace DTTS
 
             menu.LoadContent();
             level1.LoadContent();
+            level2.LoadContent();
             currentScene.LoadContent();
         }
 
@@ -103,7 +115,11 @@ namespace DTTS
             hasGameStarted = false;
         }
 
-        protected override void Draw(GameTime gameTime) => currentScene.Draw(gameTime);
+        protected override void Draw(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(GameColors.backGround);
+            currentScene.Draw(gameTime);
+        }
 
         public void HandlePlayerScore() => currentScene.HandlePlayerScore();
     }

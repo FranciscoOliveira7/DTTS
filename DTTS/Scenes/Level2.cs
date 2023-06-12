@@ -1,24 +1,22 @@
 ﻿using DTTS.GameObjects.Collectables;
 using DTTS.GameObjects;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Reflection.Metadata;
-using Microsoft.Xna.Framework.Input;
 
 namespace DTTS.Scenes
 {
-    public class Level1 : Scene
+    public class Level2 : Scene
     {
         private Wall wallTop, wallBottom, wallLeft, wallRight;
 
-        private const int numOfSpikes = 7;
-        private readonly Spike[,] spikes = new Spike[numOfSpikes, 2];
+        private const int numOfSpikes = 1;
+        private readonly Spike[,] spikes = new Spike[1, 2];
 
         private readonly List<Collectable> powerUps = new List<Collectable>();
         private Invincibility invincibility;
@@ -62,16 +60,10 @@ namespace DTTS.Scenes
             #endregion
 
             #region spikes
-            for (int i = 0; i < numOfSpikes; i++)
-            {
-                int posY = (i + 1) * 90 + 30;
-                spikes[i, 0] = new Spike(DTTSGame.instance.spikeTexture, new Vector2(-12, posY), Facing.right);
-            }
-            for (int i = 0; i < numOfSpikes; i++)
-            {
-                int posY = (i + 1) * 90 + 30;
-                spikes[i, 1] = new Spike(DTTSGame.instance.spikeTexture, new Vector2(screenWidth - 58, posY), Facing.left);
-            }
+
+            spikes[0, 0] = new Spike(DTTSGame.instance.spikeTexture, new Vector2(-12, 120), Facing.right);
+            spikes[0, 1] = new Spike(DTTSGame.instance.spikeTexture, new Vector2(screenWidth - 58, 120), Facing.left);
+
             #endregion
 
             #region adding to colliders list
@@ -81,13 +73,11 @@ namespace DTTS.Scenes
             colliders.Add(wallRight);
             colliders.AddRange(powerUps);
 
-            for (int i = 0; i < numOfSpikes; i++)
-                for (int j = 0; j < 2; j++)
-                    colliders.Add(spikes[i, j]);
+            colliders.Add(spikes[0, 0]);
+            colliders.Add(spikes[0, 1]);
 
-            for (int i = 0; i < numOfSpikes; i++)
-                for (int j = 0; j < 2; j++)
-                    spikes[i, j].Deactivate();
+            spikes[0, 0].Activate();
+            spikes[0, 1].Activate();
             #endregion
         }
 
@@ -189,8 +179,6 @@ namespace DTTS.Scenes
                 powerUps[poweUpNumber].Spawn(game.player.isFacingRight);
             }
 
-            GenerateSpikes(rnd);
-
             GameColors.UpdateColor(game.player.score);
         }
 
@@ -202,25 +190,6 @@ namespace DTTS.Scenes
             }
 
             return false;
-        }
-
-        protected void GenerateSpikes(Random rnd)
-        {
-            for (int i = 0; i < numOfSpikes; i++)
-            {
-                spikes[i, (game.player.isFacingRight ? 0 : 1)].Deactivate();
-            }
-
-            int spikeNumber = rnd.Next(numOfSpikes);
-
-            for (int j = 0; j < 3; j++)
-            {
-                //Find a deactive spike to activate
-                while (spikes[spikeNumber, (game.player.isFacingRight ? 1 : 0)].isActive)
-                    spikeNumber = rnd.Next(numOfSpikes);
-
-                spikes[spikeNumber, (game.player.isFacingRight ? 1 : 0)].Activate();
-            }
         }
     }
 }

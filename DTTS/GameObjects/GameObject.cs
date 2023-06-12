@@ -11,11 +11,6 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace DTTS.GameObjects
 {
-    public enum ObjectType
-    {
-        wall, spike, player, collectable
-    }
-
     public class GameObject
     {
         public Texture2D texture; //Object Texture
@@ -25,10 +20,7 @@ namespace DTTS.GameObjects
         public int height, width;
 
         // Object's Hitbox
-        public virtual Rectangle HitBox
-        {
-            get => new Rectangle((int)position.X, (int)position.Y, height, width);
-        }
+        public virtual Rectangle HitBox => new((int)position.X, (int)position.Y, height, width);
 
         //Contructor
         public GameObject(Texture2D texture, Vector2 position)
