@@ -209,7 +209,7 @@ namespace DTTS.GameObjects
                 }
                 else powerup.elapsedTime += (float)deltaTime;
             }
-            else if(keyboardState.IsKeyDown(Keys.E) || powerup.isAutoEquipable) powerup.Use(this);
+            else if(!isDead && keyboardState.IsKeyDown(Keys.E) || powerup.isAutoEquipable) powerup.Use(this);
         }
 
         private void Collect(Collectable powerup)
