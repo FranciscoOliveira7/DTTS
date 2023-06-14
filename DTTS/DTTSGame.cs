@@ -57,7 +57,7 @@ namespace DTTS
             _graphics.PreferredBackBufferWidth = screenWidth; //definição da largura
             _graphics.ApplyChanges();
 
-            highScore = FileUtil.LoadScore() ?? new PlayerStats(0);
+            highScore = FileUtil.LoadScore() ?? new PlayerStats();
             // ?? operator means if the FileUtil.LoadScore() return null
             // it will assign the new PlayerStats(0) instead
 
@@ -100,8 +100,7 @@ namespace DTTS
 
         public void ChangeScene(Scene newScene)
         {
-            if (currentScene is Level1) ((Level1)currentScene).Restart();
-            if (currentScene is Level2) ((Level2)currentScene).Restart();
+            currentScene.Restart();
             currentScene = newScene;
         }
 
@@ -109,6 +108,8 @@ namespace DTTS
         {
             GraphicsDevice.Clear(GameColors.backGround);
             currentScene.Draw(gameTime);
+
+            base.Draw(gameTime);
         }
 
         public void HandlePlayerScore() => currentScene.HandlePlayerScore();

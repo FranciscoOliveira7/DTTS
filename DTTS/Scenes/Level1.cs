@@ -39,7 +39,6 @@ namespace DTTS.Scenes
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             game.draw = new DrawingUtil(_spriteBatch);
-            Sounds.LoadSounds(Content);
 
             camera = new Camera();
 
@@ -65,12 +64,12 @@ namespace DTTS.Scenes
             for (int i = 0; i < numOfSpikes; i++)
             {
                 int posY = (i + 1) * 90 + 30;
-                spikes[i, 0] = new Spike(DTTSGame.instance.spikeTexture, new Vector2(-12, posY), Facing.right);
+                spikes[i, 0] = new Spike(DTTSGame.instance.spikeTexture, new Vector2(-16, posY), Facing.right);
             }
             for (int i = 0; i < numOfSpikes; i++)
             {
                 int posY = (i + 1) * 90 + 30;
-                spikes[i, 1] = new Spike(DTTSGame.instance.spikeTexture, new Vector2(screenWidth - 58, posY), Facing.left);
+                spikes[i, 1] = new Spike(DTTSGame.instance.spikeTexture, new Vector2(screenWidth - 64, posY), Facing.left);
             }
             #endregion
 
@@ -125,11 +124,6 @@ namespace DTTS.Scenes
             _spriteBatch.End();
         }
 
-        public override void PostUpdate(GameTime gameTime)
-        {
-            throw new NotImplementedException();
-        }
-
         public override void Update(GameTime gameTime)
         {
             double deltaTime = gameTime.ElapsedGameTime.TotalSeconds;
@@ -145,16 +139,17 @@ namespace DTTS.Scenes
 
             if (Keyboard.GetState().IsKeyDown(Keys.Space) && !hasPressedSpace)
             {
-                if (game.player.isDead) Restart();
+                if (game.player.isDead)
+                {
+                    if (game.highScore.highscoreSinglespike < game.player.score) game.highScore.highscoreSinglespike = game.player.score;
+                    Restart();
+                }
                 else hasGameStarted = true;
                 hasPressedSpace = true;
             }
             if (Keyboard.GetState().IsKeyUp(Keys.Space)) hasPressedSpace = false;
 
-            if (Keyboard.GetState().IsKeyDown(Keys.R))
-            {
-                Restart();
-            }
+            if (Keyboard.GetState().IsKeyDown(Keys.R)) Restart();
         }
 
         protected void MainGame(double deltaTime)
@@ -163,10 +158,9 @@ namespace DTTS.Scenes
             //camera.Follow(player);
         }
 
-        public void Restart()
+        public override void Restart()
         {
             camera.Reset();
-            if (game.highScore.highscore < game.player.score) game.highScore.highscore = game.player.score;
             hasGameStarted = false;
             game.player.Restart();
             for (int i = 0; i < numOfSpikes; i++)
@@ -184,10 +178,9 @@ namespace DTTS.Scenes
         {
             Random rnd = new Random();
 
-            if (!HasPowerUpOnScreen() && game.player.powerup == null)
+            if (game.player.powerup == null && !HasPowerUpOnScreen())
             {
-                int poweUpNumber = rnd.Next(powerUps.Count);
-                powerUps[poweUpNumber].Spawn(game.player.isFacingRight);
+                powerUps[rnd.Next(powerUps.Count)].Spawn(game.player.isFacingRight);
             }
 
             GenerateSpikes(rnd);

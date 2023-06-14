@@ -15,8 +15,7 @@ namespace DTTS.Scenes
     {
         private Wall wallTop, wallBottom, wallLeft, wallRight;
 
-        private const int numOfSpikes = 1;
-        private readonly Spike[,] spikes = new Spike[1, 2];
+        private readonly MovingSpike[] spikes = new MovingSpike[2];
 
         private readonly List<Collectable> powerUps = new List<Collectable>();
         private Invincibility invincibility;
@@ -39,7 +38,6 @@ namespace DTTS.Scenes
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             game.draw = new DrawingUtil(_spriteBatch);
-            Sounds.LoadSounds(Content);
 
             camera = new Camera();
 
@@ -62,9 +60,9 @@ namespace DTTS.Scenes
             #endregion
 
             #region spikes
-
-            spikes[0, 0] = new Spike(DTTSGame.instance.spikeTexture, new Vector2(-12, 120), Facing.right);
-            spikes[0, 1] = new Spike(DTTSGame.instance.spikeTexture, new Vector2(screenWidth - 58, 120), Facing.left);
+            
+            spikes[0] = new MovingSpike(DTTSGame.instance.spikeTexture, new Vector2(-16, 120), Facing.right);
+            spikes[1] = new MovingSpike(DTTSGame.instance.spikeTexture, new Vector2(screenWidth - 64, 120), Facing.left);
 
             RePlaceSpikes();
 
@@ -77,11 +75,11 @@ namespace DTTS.Scenes
             colliders.Add(wallRight);
             colliders.AddRange(powerUps);
 
-            colliders.Add(spikes[0, 0]);
-            colliders.Add(spikes[0, 1]);
+            colliders.Add(spikes[0]);
+            colliders.Add(spikes[1]);
 
-            spikes[0, 0].Activate();
-            spikes[0, 1].Activate();
+            spikes[0].Activate();
+            spikes[1].Activate();
             #endregion
 
             isSpikeGoingUp1 = false;
@@ -103,7 +101,7 @@ namespace DTTS.Scenes
             }
             else
             {
-                _spriteBatch.DrawString(game.mainFont, "High Score: " + game.highScore.highscore, new Vector2(205, 100), Color.White);
+                _spriteBatch.DrawString(game.mainFont, "High Score: " + game.highScore.highscoreSinglespike, new Vector2(205, 100), Color.White);
                 _spriteBatch.DrawString(game.mainFont, "Press space to Start", new Vector2(135, screenHeight / 2 + 150), Color.White);
                 _spriteBatch.DrawString(game.mainFont, "Press esc to go back", new Vector2(250, screenHeight / 2 + 200), Color.White, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
             }
@@ -123,11 +121,6 @@ namespace DTTS.Scenes
             _spriteBatch.End();
         }
 
-        public override void PostUpdate(GameTime gameTime)
-        {
-            throw new NotImplementedException();
-        }
-
         public override void Update(GameTime gameTime)
         {
             double deltaTime = gameTime.ElapsedGameTime.TotalSeconds;
@@ -143,16 +136,17 @@ namespace DTTS.Scenes
 
             if (Keyboard.GetState().IsKeyDown(Keys.Space) && !hasPressedSpace)
             {
-                if (game.player.isDead) Restart();
+                if (game.player.isDead)
+                {
+                    if (game.highScore.highscoreSinglespike < game.player.score) game.highScore.highscoreSinglespike = game.player.score;
+                    Restart();
+                }
                 else hasGameStarted = true;
                 hasPressedSpace = true;
             }
             if (Keyboard.GetState().IsKeyUp(Keys.Space)) hasPressedSpace = false;
 
-            if (Keyboard.GetState().IsKeyDown(Keys.R))
-            {
-                Restart();
-            }
+            if (Keyboard.GetState().IsKeyDown(Keys.R)) Restart();
         }
 
         protected void MainGame(double deltaTime)
@@ -162,10 +156,9 @@ namespace DTTS.Scenes
             //camera.Follow(player);
         }
 
-        public void Restart()
+        public override void Restart()
         {
             camera.Reset();
-            if (game.highScore.highscore < game.player.score) game.highScore.highscore = game.player.score;
             hasGameStarted = false;
             game.player.Restart();
 
@@ -182,10 +175,9 @@ namespace DTTS.Scenes
         {
             Random rnd = new Random();
 
-            if (!HasPowerUpOnScreen() && game.player.powerup == null)
+            if (game.player.powerup == null && !HasPowerUpOnScreen())
             {
-                int poweUpNumber = rnd.Next(powerUps.Count);
-                powerUps[poweUpNumber].Spawn(game.player.isFacingRight);
+                powerUps[rnd.Next(powerUps.Count)].Spawn(game.player.isFacingRight);
             }
 
             spikeSpeed += 0.3f;
@@ -205,33 +197,28 @@ namespace DTTS.Scenes
 
         public void MoveSpike(double deltaTime)
         {
-            if (spikes[0, 0].position.Y > DTTSGame.screenHeight - 130)
+            for (int i = 0; i < 2; i++)
             {
-                isSpikeGoingUp1 = true;
-            }
-            if (spikes[0, 1].position.Y > DTTSGame.screenHeight - 130)
-            {
-                isSpikeGoingUp2 = true;
-            }
-            if (spikes[0, 0].position.Y < 50)
-            {
-                isSpikeGoingUp1 = false;
-            }
-            if (spikes[0, 1].position.Y < 50)
-            {
-                isSpikeGoingUp2 = false;
+                if (spikes[i].position.Y > DTTSGame.screenHeight - 130)
+                {
+                    spikes[i].direction = Direction.up;
+                }
+                else if (spikes[i].position.Y < 50)
+                {
+                    spikes[i].direction = Direction.down;
+                }
             }
 
-            spikes[0, 0].Update(deltaTime, isSpikeGoingUp1 ? -spikeSpeed : spikeSpeed, DTTSGame.instance.player.timeScale);
-            spikes[0, 1].Update(deltaTime, isSpikeGoingUp2 ? -spikeSpeed : spikeSpeed, DTTSGame.instance.player.timeScale);
+            spikes[0].Update(deltaTime, spikeSpeed, DTTSGame.instance.player.timeScale);
+            spikes[1].Update(deltaTime, spikeSpeed, DTTSGame.instance.player.timeScale);
         }
 
         public void RePlaceSpikes()
         {
             Random rnd = new Random();
 
-            spikes[0, 0].position = new (-12, rnd.Next(1, 8) * 90 + 30);
-            spikes[0, 1].position = new (screenWidth - 58, rnd.Next(1, 8) * 90 + 30);
+            spikes[0].position.Y = rnd.Next(1, 8) * 90 + 30;
+            spikes[1].position.Y = rnd.Next(1, 8) * 90 + 30;
         }
     }
 }

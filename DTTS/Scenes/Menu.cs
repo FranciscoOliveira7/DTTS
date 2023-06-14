@@ -70,7 +70,8 @@ namespace DTTS.Scenes
         {
             _spriteBatch.Begin();
 
-            _spriteBatch.DrawString(game.mainFont, "High Score: " + game.highScore.highscore, new Vector2(205, 100), Color.White);
+            //_spriteBatch.DrawString(game.mainFont, "High Score: " + game.highScore.highscore, new Vector2(205, 80), Color.White);
+            _spriteBatch.DrawString(game.mainFont, "DTTS", new Vector2(290, 100), Color.White);
 
             foreach (var gameObject in colliders)
             {
@@ -97,10 +98,8 @@ namespace DTTS.Scenes
             throw new NotImplementedException();
         }
 
-        public override void PostUpdate(GameTime gameTime)
-        {
-            throw new NotImplementedException();
-        }
+        // No restart needed for the menu
+        public override void Restart() { }
 
         public override void Update(GameTime gameTime)
         {

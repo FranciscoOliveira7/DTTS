@@ -10,15 +10,12 @@ namespace DTTS
     public class PlayerStats
     {
         public int highscore;
+        public int highscoreSinglespike;
 
         public PlayerStats()
         {
-            this.highscore = 0;
-        }
-
-        public PlayerStats(int score)
-        {
-            this.highscore = score;
+            highscore = 0;
+            highscoreSinglespike = 0;
         }
     }
 }

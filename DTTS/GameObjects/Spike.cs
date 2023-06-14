@@ -19,11 +19,10 @@ namespace DTTS.GameObjects
 
     public class Spike : GameObject
     {
-        Vector2 origin;
-        Facing facing;
+        private readonly Facing facing;
         public bool isActive;
 
-        float activePosition { get; }
+        private readonly float ActivePosition;
 
         //Contructor
         public Spike(Texture2D texture, Vector2 position, Facing facing) : base(texture, position)
@@ -33,30 +32,24 @@ namespace DTTS.GameObjects
             this.facing = facing;
             height = 80;
             width = 80;
-            origin = new Vector2(texture.Width / 2, texture.Height / 2);
-            activePosition = position.X;
+            ActivePosition = position.X;
         }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, new((int)position.X + 35, (int)position.Y + 35, height, width), null, GameColors.foreGround, 0, origin, (SpriteEffects)facing, 0f);
-        }
-
-        //Update method (is executed every tick)
-        public void Update(double deltaTime, float velocity, float timeScale)
-        {
-            position.Y += velocity * 60 * (float)deltaTime * timeScale;
+            //spriteBatch.Draw(texture, new((int)position.X + 35, (int)position.Y + 35, height, width), null, GameColors.foreGround, 0, new(texture.Width / 2, texture.Height / 2), (SpriteEffects)facing, 0f);
+            spriteBatch.Draw(texture, HitBox, null, GameColors.foreGround, 0, Vector2.Zero, (SpriteEffects)facing, 0f);
         }
 
         public void Activate()
         {
-            position.X = activePosition;
+            position.X = ActivePosition;
             isActive = true;
         }
 
         public void Deactivate()
         {
-            position.X = activePosition - 50 * (facing == Facing.right ? 1 : -1);
+            position.X = ActivePosition - 50 * (facing == Facing.right ? 1 : -1);
             isActive = false;
         }
     }

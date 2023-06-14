@@ -29,12 +29,12 @@ namespace DTTS.Scenes
 
         public abstract void Draw(GameTime gameTime);
 
-        public abstract void PostUpdate(GameTime gameTime);
-
         public abstract void Update(GameTime gameTime);
 
         public abstract void LoadContent();
 
         public abstract void HandlePlayerScore();
+
+        public abstract void Restart();
     }
 }
