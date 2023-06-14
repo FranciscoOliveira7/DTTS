@@ -1,18 +1,16 @@
-﻿using DTTS.GameObjects.Collectables;
+﻿using DTTS.Controls;
 using DTTS.GameObjects;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DTTS.Controls;
-using Microsoft.Xna.Framework.Input;
 
 namespace DTTS.Scenes
 {
-    public class Menu : Scene
+    public class InfoLevel : Scene
     {
         private Wall wallTop, wallBottom, wallLeft, wallRight;
 
@@ -20,33 +18,24 @@ namespace DTTS.Scenes
         private readonly List<GameObject> colliders = new List<GameObject>();
 
         readonly List<Button> buttons = new List<Button>();
-        Button quitGameBtn, infoBtn, level1GameBtn, level2GameBtn;
+        Button backGameBtn, level1GameBtn, level2GameBtn;
 
         public override void LoadContent()
         {
             #region buttons
-            quitGameBtn = new Button(DTTSGame.instance.squareTexture, DTTSGame.instance.mainFont)
+            backGameBtn = new Button(DTTSGame.instance.squareTexture, DTTSGame.instance.mainFont)
             {
                 width = 300,
                 Position = new Vector2(DTTSGame.screenWidth / 2 - 150, DTTSGame.screenHeight - 150),
-                Text = "Leave",
+                Text = "Back",
             };
-            quitGameBtn.Click += QuitGameBtn_Click;
-            buttons.Add(quitGameBtn);
-
-            infoBtn = new Button(DTTSGame.instance.squareTexture, DTTSGame.instance.mainFont)
-            {
-                width = 300,
-                Position = new Vector2(DTTSGame.screenWidth / 2 - 150, DTTSGame.screenHeight - 220),
-                Text = "How to play",
-            };
-            infoBtn.Click += infoBtn_Click;
-            buttons.Add(infoBtn);
+            backGameBtn.Click += BackGameBtn_Click;
+            buttons.Add(backGameBtn);
 
             level1GameBtn = new Button(DTTSGame.instance.squareTexture, DTTSGame.instance.mainFont)
             {
                 width = 300,
-                Position = new Vector2(DTTSGame.screenWidth / 2 - 150, DTTSGame.screenHeight - 360),
+                Position = new Vector2(DTTSGame.screenWidth / 2 - 150, DTTSGame.screenHeight - 290),
                 Text = "Classic",
             };
             level1GameBtn.Click += LoadLevel1Btn_Click;
@@ -55,7 +44,7 @@ namespace DTTS.Scenes
             level2GameBtn = new Button(DTTSGame.instance.squareTexture, DTTSGame.instance.mainFont)
             {
                 width = 300,
-                Position = new Vector2(DTTSGame.screenWidth / 2 - 150, DTTSGame.screenHeight - 290),
+                Position = new Vector2(DTTSGame.screenWidth / 2 - 150, DTTSGame.screenHeight - 220),
                 Text = "Single Spike",
             };
             level2GameBtn.Click += LoadLevel2Btn_Click;
@@ -82,7 +71,7 @@ namespace DTTS.Scenes
             _spriteBatch.Begin();
 
             //_spriteBatch.DrawString(game.mainFont, "High Score: " + game.highScore.highscore, new Vector2(205, 80), Color.White);
-            _spriteBatch.DrawString(game.mainFont, "DTTS", new Vector2(290, 100), Color.White);
+            _spriteBatch.DrawString(game.mainFont, "How to Play", new Vector2(224, 100), Color.White);
 
             foreach (var gameObject in colliders)
             {
@@ -94,7 +83,7 @@ namespace DTTS.Scenes
                 button.Draw(gameTime, _spriteBatch);
             }
 
-            game.player.Draw(_spriteBatch);
+            //game.player.Draw(_spriteBatch);
 
             if (game.player.powerup != null && !game.player.powerup.isActive)
             {
@@ -122,22 +111,15 @@ namespace DTTS.Scenes
 
         public void LoadLevel1Btn_Click(object sender, EventArgs e)
         {
-            DTTSGame.instance.ChangeScene(DTTSGame.instance.level1);
         }
 
         public void LoadLevel2Btn_Click(object sender, EventArgs e)
         {
-            DTTSGame.instance.ChangeScene(DTTSGame.instance.level2);
         }
 
-        public void QuitGameBtn_Click(object sender, EventArgs e)
+        public void BackGameBtn_Click(object sender, EventArgs e)
         {
-            DTTSGame.instance.Exit();
-        }
-
-        public void infoBtn_Click(object sender, EventArgs e)
-        {
-            DTTSGame.instance.ChangeScene(DTTSGame.instance.info);
+            DTTSGame.instance.ChangeScene(DTTSGame.instance.menu);
         }
     }
 }

@@ -141,7 +141,7 @@ namespace DTTS.Scenes
             {
                 if (game.player.isDead)
                 {
-                    if (game.highScore.highscoreSinglespike < game.player.score) game.highScore.highscoreSinglespike = game.player.score;
+                    if (game.highScore.highscore < game.player.score) game.highScore.highscore = game.player.score;
                     Restart();
                 }
                 else hasGameStarted = true;

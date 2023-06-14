@@ -40,6 +40,7 @@ namespace DTTS
         public Scene menu;
         public Scene level1;
         public Scene level2;
+        public Scene info;
 
         public DTTSGame()
         {
@@ -66,6 +67,7 @@ namespace DTTS
             menu = new Menu();
             level1 = new Level1();
             level2 = new Level2();
+            info = new InfoLevel();
             currentScene = menu;
 
             base.Initialize();
@@ -88,6 +90,7 @@ namespace DTTS
             menu.LoadContent();
             level1.LoadContent();
             level2.LoadContent();
+            info.LoadContent();
             currentScene.LoadContent();
         }
 
