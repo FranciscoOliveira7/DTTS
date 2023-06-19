@@ -7,7 +7,7 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DTTS
+namespace DTTS.Utilities
 {
     public static class Sounds
     {
@@ -16,6 +16,7 @@ namespace DTTS
         public static SoundEffect score;
         public static SoundEffect invincibility;
         public static SoundEffect pickup;
+        public static SoundEffect explosion;
 
         public static SoundEffectInstance invincibilityInstance;
 
@@ -26,6 +27,7 @@ namespace DTTS
             score = Content.Load<SoundEffect>("score");
             invincibility = Content.Load<SoundEffect>("superstar");
             pickup = Content.Load<SoundEffect>("pickup");
+            explosion = Content.Load<SoundEffect>("boom");
 
             invincibilityInstance = invincibility.CreateInstance();
             invincibilityInstance.Volume = .15f;

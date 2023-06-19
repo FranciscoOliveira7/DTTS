@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DTTS
+namespace DTTS.Utilities
 {
     public class DrawingUtil
     {

@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection.Metadata;
 using Microsoft.Xna.Framework.Input;
+using DTTS.Utilities;
 
 namespace DTTS.Scenes
 {
@@ -126,7 +127,6 @@ namespace DTTS.Scenes
 
         public override void Update(GameTime gameTime)
         {
-            double deltaTime = gameTime.ElapsedGameTime.TotalSeconds;
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
@@ -135,7 +135,7 @@ namespace DTTS.Scenes
                 DTTSGame.instance.ChangeScene(DTTSGame.instance.menu);
             }
 
-            if (hasGameStarted) MainGame(deltaTime);
+            if (hasGameStarted) MainGame();
 
             if (Keyboard.GetState().IsKeyDown(Keys.Space) && !hasPressedSpace)
             {
@@ -152,9 +152,9 @@ namespace DTTS.Scenes
             if (Keyboard.GetState().IsKeyDown(Keys.R)) Restart();
         }
 
-        protected void MainGame(double deltaTime)
+        protected void MainGame()
         {
-            game.player.Update(deltaTime, colliders);
+            game.player.Update(game.deltaTime, colliders);
             //camera.Follow(player);
         }
 

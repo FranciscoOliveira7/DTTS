@@ -41,7 +41,7 @@ namespace DTTS.Scenes
                 Text = "How to play",
             };
             infoBtn.Click += infoBtn_Click;
-            buttons.Add(infoBtn);
+            //buttons.Add(infoBtn);
 
             level1GameBtn = new Button(DTTSGame.instance.squareTexture, DTTSGame.instance.mainFont)
             {

@@ -1,6 +1,7 @@
 ﻿using DTTS.GameObjects;
 using DTTS.GameObjects.Collectables;
 using DTTS.Scenes;
+using DTTS.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
@@ -29,6 +30,7 @@ namespace DTTS
         // Textures
         public Texture2D spikeTexture;
         public Texture2D squareTexture;
+        public Texture2D explosionTexture;
 
         public const int screenHeight = 850, screenWidth = 700;
 
@@ -41,6 +43,8 @@ namespace DTTS
         public Scene level1;
         public Scene level2;
         public Scene info;
+
+        public float deltaTime;
 
         public DTTSGame()
         {
@@ -75,13 +79,12 @@ namespace DTTS
 
         protected override void LoadContent()
         {
-            player = new Player(Content.Load<Texture2D>("Bird"), new(screenWidth / 2 - 35, screenHeight / 2 - 35));
-
             draw = new DrawingUtil(_spriteBatch);
             Sounds.LoadSounds(Content);
 
             spikeTexture = Content.Load<Texture2D>("Spike");
             squareTexture = Content.Load<Texture2D>("Square");
+            explosionTexture = Content.Load<Texture2D>("explosion");
 
             mainFont = Content.Load<SpriteFont>("MainFont");
             scoreFont = Content.Load<SpriteFont>("ScoreFont");
@@ -92,10 +95,14 @@ namespace DTTS
             level2.LoadContent();
             info.LoadContent();
             currentScene.LoadContent();
+
+            player = new Player(Content.Load<Texture2D>("Bird"), new(screenWidth / 2 - 35, screenHeight / 2 - 35));
         }
 
         protected override void Update(GameTime gameTime)
         {
+            deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             currentScene.Update(gameTime);
 
             base.Update(gameTime);
@@ -110,6 +117,7 @@ namespace DTTS
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(GameColors.backGround);
+
             currentScene.Draw(gameTime);
 
             base.Draw(gameTime);

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DTTS
+namespace DTTS.Utilities
 {
     public static class GameColors
     {
@@ -16,8 +16,8 @@ namespace DTTS
         {
             switch (score)
             {
-                case  5:
-                    foreGround = Color.SlateGray; 
+                case 5:
+                    foreGround = Color.SlateGray;
                     backGround = Color.LightGray;
                     break;
                 case 10:

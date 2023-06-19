@@ -1,4 +1,5 @@
 ﻿using DTTS.GameObjects.Collectables;
+using DTTS.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -23,6 +24,8 @@ namespace DTTS.GameObjects
         public int score;
         public Collectable powerup;
 
+        public Animation explosion;
+
         // Player's hitbox
         public override Rectangle HitBox => new ((int)position.X, (int)position.Y + 8, width, height - 16);
 
@@ -46,17 +49,21 @@ namespace DTTS.GameObjects
             KeyboardState keyboardState = Keyboard.GetState();
 
             Movement(keyboardState);
+            if (!isDead)
             Gravity(deltaTime);
             HandlePowerUp(deltaTime, keyboardState);
             HandleCollision(gameObjects);
             Angle(deltaTime);
 
-            position += velocity * 60 * (float)deltaTime * timeScale;
+            if (!isDead) position += velocity * 60 * (float)deltaTime * timeScale;
+            else explosion.Update();
         }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, new((int)position.X + width / 2, (int)position.Y + height / 2, height, width), null, Color.White, angle, new Vector2(texture.Width / 2, texture.Height / 2), (isFacingRight ? SpriteEffects.None : SpriteEffects.FlipHorizontally) , 0f);
+            if (!isDead)
+                spriteBatch.Draw(texture, new((int)position.X + width / 2, (int)position.Y + height / 2, height, width), null, Color.White, angle, new Vector2(texture.Width / 2, texture.Height / 2), (isFacingRight ? SpriteEffects.None : SpriteEffects.FlipHorizontally) , 0f);
+            else explosion.Draw(position, spriteBatch);
             #if DEBUG
                 var drawing = new DrawingUtil(spriteBatch);
                 drawing.DrawRectangleBorder(HitBox, Color.White, 2);
@@ -91,7 +98,7 @@ namespace DTTS.GameObjects
                     {
                         velocity.Y = 0;
                         if (!isDead) Die();
-                        Jump();
+                        //Jump();
                     }
                     if (gameObject is Spike && !isInvincible)
                     {
@@ -174,7 +181,9 @@ namespace DTTS.GameObjects
         {
             speed = (speed > 0 ? 20 : -20); // Bounces faster (funny)
             isDead = true;
-            Sounds.death.Play(volume: 0.3f, pitch: 0.0f, pan: 0.0f);
+            //Sounds.death.Play(volume: 0.3f, pitch: 0.0f, pan: 0.0f);
+            Sounds.explosion.Play(volume: 0.5f, pitch: 0.0f, pan: 0.0f);
+            explosion = new Animation(DTTSGame.instance.explosionTexture, 17, .03f, 70, 1);
         }
 
         public void Score()

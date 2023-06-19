@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO.Pipes;
 
-namespace DTTS
+namespace DTTS.Utilities
 {
     static class FileUtil
     {
@@ -38,8 +38,9 @@ namespace DTTS
                     PlayerStats playerStats = (PlayerStats)serializer.Deserialize(file);
                     file.Close();
                     return playerStats;
-                }  
-                catch {
+                }
+                catch
+                {
                     file.Close();
                     return null;
                 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using DTTS.Utilities;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
 using System;

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DTTS.Utilities;
 
 namespace DTTS.Scenes
 {
@@ -123,8 +124,6 @@ namespace DTTS.Scenes
 
         public override void Update(GameTime gameTime)
         {
-            double deltaTime = gameTime.ElapsedGameTime.TotalSeconds;
-
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
                 FileUtil.SaveScore(game.highScore);
@@ -132,7 +131,7 @@ namespace DTTS.Scenes
                 DTTSGame.instance.ChangeScene(DTTSGame.instance.menu);
             }
 
-            if (hasGameStarted) MainGame(deltaTime);
+            if (hasGameStarted) MainGame();
 
             if (Keyboard.GetState().IsKeyDown(Keys.Space) && !hasPressedSpace)
             {
@@ -149,10 +148,10 @@ namespace DTTS.Scenes
             if (Keyboard.GetState().IsKeyDown(Keys.R)) Restart();
         }
 
-        protected void MainGame(double deltaTime)
+        protected void MainGame()
         {
-            game.player.Update(deltaTime, colliders);
-            MoveSpike(deltaTime);
+            game.player.Update(game.deltaTime, colliders);
+            MoveSpike();
             //camera.Follow(player);
         }
 
@@ -195,7 +194,7 @@ namespace DTTS.Scenes
             return false;
         }
 
-        public void MoveSpike(double deltaTime)
+        public void MoveSpike()
         {
             for (int i = 0; i < 2; i++)
             {
@@ -209,8 +208,8 @@ namespace DTTS.Scenes
                 }
             }
 
-            spikes[0].Update(deltaTime, spikeSpeed, DTTSGame.instance.player.timeScale);
-            spikes[1].Update(deltaTime, spikeSpeed, DTTSGame.instance.player.timeScale);
+            spikes[0].Update(game.deltaTime, spikeSpeed, DTTSGame.instance.player.timeScale);
+            spikes[1].Update(game.deltaTime, spikeSpeed, DTTSGame.instance.player.timeScale);
         }
 
         public void RePlaceSpikes()
